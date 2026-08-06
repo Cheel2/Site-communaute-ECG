@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
 import type { ApiResponse } from "@/types/api";
 import { loginSchema } from "./schemas";
 
@@ -22,8 +21,7 @@ export async function login(
     };
   }
 
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
@@ -47,8 +45,7 @@ export async function login(
 }
 
 export async function logout(): Promise<AuthActionResult> {
-  const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   await supabase.auth.signOut();
 
