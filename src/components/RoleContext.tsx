@@ -1,4 +1,3 @@
-export {}
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
@@ -37,7 +36,6 @@ export function RoleProvider({
           .single();
 
         if (error) {
-          console.error("Erreur lors de la récupération du rôle:", error);
           setRole(null);
         } else {
           setRole(data.role as Role);

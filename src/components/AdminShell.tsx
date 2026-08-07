@@ -75,7 +75,7 @@ export function AdminShell({
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile menu button */}
+        {/* Mobile header */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:hidden">
           <button
             type="button"
@@ -97,7 +97,15 @@ export function AdminShell({
               />
             </svg>
           </button>
-          <span className="truncate text-sm text-gray-600">{userEmail}</span>
+          <div className="flex items-center gap-2">
+            <span className="truncate text-sm text-gray-600">{userEmail}</span>
+            <button
+              onClick={handleLogout}
+              className="rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700"
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         {/* Desktop header */}
