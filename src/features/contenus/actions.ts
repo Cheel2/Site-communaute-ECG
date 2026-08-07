@@ -84,15 +84,14 @@ export async function listContenus(): Promise<ContenuAvecRubrique[]> {
     const { data, error } = await supabase
       .from('contenu')
       .select('*, rubrique(nom)')
-      .order('date_creation', { ascending: false })
-      .returns<ContenuAvecRubrique[]>();
+      .order('date_creation', { ascending: false });
 
     if (error) {
       console.error('listContenus: Supabase error', error);
       return [];
     }
 
-    return data ?? [];
+    return (data ?? []) as ContenuAvecRubrique[];
   } catch (error) {
     console.error('listContenus: Unexpected error', error);
     return [];
@@ -138,7 +137,6 @@ export async function createContenu(
       .from('contenu')
       .insert(payload)
       .select('*, rubrique(nom)')
-      .returns<ContenuAvecRubrique>()
       .single();
 
     if (error) {
@@ -156,7 +154,7 @@ export async function createContenu(
 
     revalidateTag('contenus');
 
-    return { data };
+    return { data: data as ContenuAvecRubrique };
   } catch {
     return {
       error: {
@@ -203,7 +201,6 @@ export async function updateContenu(
       .from('contenu')
       .select('statut, date_publication')
       .eq('id', id)
-      .returns<Pick<Contenu, 'statut' | 'date_publication'>>()
       .maybeSingle();
 
     if (currentError) {
@@ -219,13 +216,14 @@ export async function updateContenu(
       };
     }
 
+    const currentData = current as { statut: string; date_publication: string | null } | null;
     const now = new Date().toISOString();
 
-    let date_publication: string | null = current.date_publication ?? null;
+    let date_publication: string | null = currentData?.date_publication ?? null;
 
     if (
       parsed.data.statut === 'publie' &&
-      (current.statut !== 'publie' || !date_publication)
+      (currentData?.statut !== 'publie' || !date_publication)
     ) {
       date_publication = now;
     }
@@ -249,7 +247,6 @@ export async function updateContenu(
       .update(payload)
       .eq('id', id)
       .select('*, rubrique(nom)')
-      .returns<ContenuAvecRubrique>()
       .single();
 
     if (error) {
@@ -267,7 +264,7 @@ export async function updateContenu(
 
     revalidateTag('contenus');
 
-    return { data };
+    return { data: data as ContenuAvecRubrique };
   } catch {
     return {
       error: {
@@ -303,7 +300,6 @@ export async function deleteContenu(
       .delete()
       .eq('id', id)
       .select('id')
-      .returns<Pick<Contenu, 'id'>>()
       .maybeSingle();
 
     if (error) {
