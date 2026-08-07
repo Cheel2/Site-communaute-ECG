@@ -1,28 +1,30 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import type { Brouillon } from "@/types/database";
+import { useCallback } from "react";
+import type { FormEvent } from "react";
+import type { Rubrique } from "@/types/database";
+import type { StatutContenu } from "@/features/contenus/schemas";
 import { TiptapEditor } from "@/components/ui/tiptap-editor";
 import { useAutoSave } from "@/features/contenus/use-auto-save";
 import type { SaveBrouillonInput } from "@/features/brouillons/schemas";
 
-interface RubriqueOption {
-  id: string;
-  nom: string;
-}
-
 interface ContenusFormProps {
-  mode: "create" | "edit";
+  rubriques: Rubrique[];
+  titre: string;
+  texte: string;
+  rubriqueId: string;
+  statut: StatutContenu;
+  imageUrl: string;
+  isSaving: boolean;
+  isEditing: boolean;
   contenuId?: string;
-  initialTitre?: string;
-  initialRubriqueId?: string;
-  initialTexte?: string;
-  initialStatut?: "publie" | "non_publie";
-  initialMisEnAvant?: boolean;
-  rubriques: RubriqueOption[];
-  brouillonInitial?: Brouillon | null;
-  onSubmit: (formData: FormData) => void;
-  isSubmitting: boolean;
+  onTitreChange: (value: string) => void;
+  onTexteChange: (value: string) => void;
+  onRubriqueChange: (value: string) => void;
+  onStatutChange: (value: StatutContenu) => void;
+  onImageUrlChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCancel: () => void;
 }
 
 function formatTime(date: Date): string {
@@ -74,63 +76,44 @@ function SaveStatusIndicator({
 }
 
 export function ContenusForm({
-  mode,
-  contenuId,
-  initialTitre,
-  initialRubriqueId,
-  initialTexte,
-  initialStatut,
-  initialMisEnAvant,
   rubriques,
-  brouillonInitial,
+  titre,
+  texte,
+  rubriqueId,
+  statut,
+  imageUrl,
+  isSaving,
+  isEditing,
+  contenuId,
+  onTitreChange,
+  onTexteChange,
+  onRubriqueChange,
+  onStatutChange,
+  onImageUrlChange,
   onSubmit,
-  isSubmitting,
+  onCancel,
 }: ContenusFormProps) {
-  const [titre, setTitre] = useState(
-    brouillonInitial?.titre ?? initialTitre ?? ""
+  const getData = useCallback(
+    (): SaveBrouillonInput => ({
+      titre,
+      rubrique_id: rubriqueId || null,
+      texte,
+      image_url: imageUrl || null,
+    }),
+    [titre, rubriqueId, texte, imageUrl]
   );
-  const [rubriqueId, setRubriqueId] = useState(
-    brouillonInitial?.rubrique_id ?? initialRubriqueId ?? ""
-  );
-  const [texte, setTexte] = useState(
-    brouillonInitial?.texte ?? initialTexte ?? ""
-  );
-  const [statut, setStatut] = useState<"publie" | "non_publie">(
-    initialStatut ?? "non_publie"
-  );
-  const [misEnAvant, setMisEnAvant] = useState(initialMisEnAvant ?? false);
 
-  const getData = useCallback((): SaveBrouillonInput => ({
-    titre,
-    rubrique_id: rubriqueId || null,
-    texte,
-    image_url: null,
-  }), [titre, rubriqueId, texte]);
-
-  const { isSaving, lastSaved, error } = useAutoSave({
+  const {
+    isSaving: isAutoSaving,
+    lastSaved,
+    error: autoSaveError,
+  } = useAutoSave({
     contenuId: contenuId ?? null,
     getData,
   });
 
-  const handleTextChange = useCallback((html: string) => {
-    setTexte(html);
-  }, []);
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const formData = new FormData();
-    formData.set("titre", titre);
-    formData.set("rubrique_id", rubriqueId);
-    formData.set("texte", texte);
-    formData.set("statut", statut);
-    formData.set("mis_en_avant", String(misEnAvant));
-
-    onSubmit(formData);
-  };
-
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       {/* Titre */}
       <div>
         <label
@@ -143,7 +126,7 @@ export function ContenusForm({
           id="titre"
           type="text"
           value={titre}
-          onChange={(event) => setTitre(event.target.value)}
+          onChange={(event) => onTitreChange(event.target.value)}
           required
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           placeholder="Titre du contenu"
@@ -161,7 +144,7 @@ export function ContenusForm({
         <select
           id="rubrique_id"
           value={rubriqueId}
-          onChange={(event) => setRubriqueId(event.target.value)}
+          onChange={(event) => onRubriqueChange(event.target.value)}
           required
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         >
@@ -174,19 +157,37 @@ export function ContenusForm({
         </select>
       </div>
 
-      {/* Éditeur TipTap */}
+      {/* Éditeur TipTap + indicateur d'auto-save */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Texte
         </label>
-        <TiptapEditor content={texte} onChange={handleTextChange} />
+        <TiptapEditor content={texte} onChange={onTexteChange} />
         <div className="mt-1">
           <SaveStatusIndicator
-            isSaving={isSaving}
+            isSaving={isAutoSaving}
             lastSaved={lastSaved}
-            error={error}
+            error={autoSaveError}
           />
         </div>
+      </div>
+
+      {/* Image (URL) */}
+      <div>
+        <label
+          htmlFor="image_url"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Image (URL)
+        </label>
+        <input
+          id="image_url"
+          type="text"
+          value={imageUrl}
+          onChange={(event) => onImageUrlChange(event.target.value)}
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          placeholder="URL de l'image (optionnel)"
+        />
       </div>
 
       {/* Statut */}
@@ -201,7 +202,7 @@ export function ContenusForm({
           id="statut"
           value={statut}
           onChange={(event) =>
-            setStatut(event.target.value as "publie" | "non_publie")
+            onStatutChange(event.target.value as StatutContenu)
           }
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         >
@@ -210,35 +211,26 @@ export function ContenusForm({
         </select>
       </div>
 
-      {/* Mise en avant */}
-      <div className="flex items-center gap-2">
-        <input
-          id="mis_en_avant"
-          type="checkbox"
-          checked={misEnAvant}
-          onChange={(event) => setMisEnAvant(event.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-        <label
-          htmlFor="mis_en_avant"
-          className="text-sm font-medium text-gray-700"
-        >
-          Mettre en avant sur l'accueil
-        </label>
-      </div>
-
-      {/* Bouton de soumission */}
-      <div className="pt-4 border-t border-gray-200">
+      {/* Boutons */}
+      <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row">
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          disabled={isSaving}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting
+          {isSaving
             ? "Enregistrement…"
-            : mode === "create"
-              ? "Créer le contenu"
-              : "Modifier le contenu"}
+            : isEditing
+              ? "Modifier le contenu"
+              : "Créer le contenu"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isSaving}
+          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Annuler
         </button>
       </div>
     </form>
