@@ -1,4 +1,3 @@
-export default function Page() { return <div></div>; }
 import type { Metadata } from 'next';
 import { listRubriques } from '@/features/rubriques/actions';
 import RubriquesClient from './rubriques-client';
