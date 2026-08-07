@@ -1,6 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidateTag } from 'next/cache';
 import type { ZodError } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -13,7 +12,7 @@ import {
   type UpdateRubriqueInput,
 } from './schemas';
 
-type SupabaseClient = ReturnType<typeof createClient>;
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 type SupabaseError = {
   code?: string;
@@ -77,8 +76,7 @@ async function requireAuthenticatedUser(
 
 export async function listRubriques(): Promise<Rubrique[]> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('rubrique')
@@ -112,8 +110,7 @@ export async function createRubrique(
   }
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const authError = await requireAuthenticatedUser(supabase);
     if (authError) {
@@ -187,8 +184,7 @@ export async function updateRubrique(
   }
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const authError = await requireAuthenticatedUser(supabase);
     if (authError) {
@@ -248,8 +244,7 @@ export async function deleteRubrique(
   }
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const authError = await requireAuthenticatedUser(supabase);
     if (authError) {
@@ -261,7 +256,6 @@ export async function deleteRubrique(
       .delete()
       .eq('id', id)
       .select('id')
-      .returns<Pick<Rubrique, 'id'>>()
       .maybeSingle();
 
     if (error) {
