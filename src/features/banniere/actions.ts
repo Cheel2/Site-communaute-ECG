@@ -100,8 +100,6 @@ export async function updateBanniere(
     const { data: existing, error: existingError } = await supabase
       .from('banniere')
       .select('id')
-      .returns<Pick<Banniere, 'id'>>()
-      .limit(1)
       .maybeSingle();
 
     if (existingError) {
@@ -109,7 +107,7 @@ export async function updateBanniere(
     }
 
     const payload = {
-      id: existing?.id ?? globalThis.crypto.randomUUID(),
+      id: (existing as { id: string } | null)?.id ?? globalThis.crypto.randomUUID(),
       image_url: parsed.data.image_url,
       message: parsed.data.message,
       date_modification: new Date().toISOString(),
