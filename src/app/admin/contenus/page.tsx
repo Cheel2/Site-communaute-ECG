@@ -14,4 +14,4 @@ export default async function ContenusPage() {
   ]);
 
   return <ContenusClient initialContenus={contenus} rubriques={rubriques} />;
-}export default function Page() { return <div></div>; }
+}
