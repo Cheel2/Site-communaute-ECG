@@ -1,6 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidateTag } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { Banniere } from '@/types/database';
@@ -46,8 +45,7 @@ function mapSupabaseError(error: SupabaseError): ApiError {
 
 export async function getBanniere(): Promise<Banniere | null> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('banniere')
@@ -86,8 +84,7 @@ export async function updateBanniere(
   }
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: userData, error: authError } = await supabase.auth.getUser();
 
