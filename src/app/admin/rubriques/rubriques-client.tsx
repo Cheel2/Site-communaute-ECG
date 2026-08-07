@@ -8,6 +8,9 @@ import {
   deleteRubrique,
   updateRubrique,
 } from '@/features/rubriques/actions';
+import RubriquesForm from './rubriques-form';
+import RubriquesList from './rubriques-list';
+import DeleteModal from './delete-modal';
 
 type Feedback = {
   type: 'success' | 'error';
@@ -23,15 +26,6 @@ function sortRubriques(items: Rubrique[]): Rubrique[] {
     (a, b) =>
       a.ordre_affichage - b.ordre_affichage ||
       a.nom.localeCompare(b.nom, 'fr')
-  );
-}
-
-function Spinner() {
-  return (
-    <span
-      aria-hidden="true"
-      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-    />
   );
 }
 
@@ -90,7 +84,8 @@ export default function RubriquesClient({
     if (isSaving) return;
 
     const trimmedNom = nom.trim();
-    const rawOrdre = ordreAffichage.trim() === '' ? '0' : ordreAffichage.trim();
+    const rawOrdre =
+      ordreAffichage.trim() === '' ? '0' : ordreAffichage.trim();
     const ordre = Number(rawOrdre);
 
     if (!trimmedNom) {
@@ -228,279 +223,35 @@ export default function RubriquesClient({
         </div>
       )}
 
-      <form
+      <RubriquesForm
+        nom={nom}
+        ordreAffichage={ordreAffichage}
+        isSaving={isSaving}
+        isEditing={Boolean(rubriqueEnEdition)}
+        onNomChange={setNom}
+        onOrdreChange={setOrdreAffichage}
         onSubmit={handleSubmit}
-        className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-        noValidate
-      >
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-gray-900">
-            {rubriqueEnEdition
-              ? 'Modifier la rubrique'
-              : 'Ajouter une rubrique'}
-          </h2>
+        onCancel={() => {
+          resetForm();
+          setFeedback(null);
+        }}
+      />
 
-          {rubriqueEnEdition && (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                setFeedback(null);
-              }}
-              disabled={isBusy}
-              className="text-sm text-gray-600 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Annuler
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-1">
-            <label
-              htmlFor="rubrique-nom"
-              className="block text-sm font-medium text-gray-800"
-            >
-              Nom
-            </label>
-            <input
-              id="rubrique-nom"
-              name="nom"
-              type="text"
-              value={nom}
-              onChange={(event) => setNom(event.target.value)}
-              disabled={isBusy}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="rubrique-ordre-affichage"
-              className="block text-sm font-medium text-gray-800"
-            >
-              Ordre d&apos;affichage
-            </label>
-            <input
-              id="rubrique-ordre-affichage"
-              name="ordre_affichage"
-              type="number"
-              step="1"
-              inputMode="numeric"
-              value={ordreAffichage}
-              onChange={(event) => setOrdreAffichage(event.target.value)}
-              disabled={isBusy}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-            />
-            <p className="text-xs text-gray-500">
-              Les rubriques sont affichées de la plus petite à la plus grande
-              valeur.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-          >
-            {isSaving ? (
-              <>
-                <Spinner />
-                <span>Enregistrement…</span>
-              </>
-            ) : (
-              'Enregistrer'
-            )}
-          </button>
-
-          {rubriqueEnEdition && (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                setFeedback(null);
-              }}
-              disabled={isBusy}
-              className="inline-flex w-full items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-            >
-              Annuler
-            </button>
-          )}
-        </div>
-      </form>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-gray-900">
-            Rubriques existantes
-          </h2>
-          <span className="text-sm text-gray-500">
-            {rubriques.length} rubrique{rubriques.length > 1 ? 's' : ''}
-          </span>
-        </div>
-
-        {rubriques.length === 0 ? (
-          <p className="rounded-md border border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm text-gray-600">
-            Aucune rubrique. Ajoutez la première rubrique avec le formulaire
-            ci-dessus.
-          </p>
-        ) : (
-          <>
-            <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="bg-gray-50 text-xs uppercase text-gray-600">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Nom</th>
-                    <th className="px-4 py-3 font-medium">Ordre</th>
-                    <th className="px-4 py-3 text-right font-medium">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rubriques.map((rubrique) => (
-                    <tr
-                      key={rubrique.id}
-                      className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                    >
-                      <td className="px-4 py-3 font-medium text-gray-900">
-                        {rubrique.nom}
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {rubrique.ordre_affichage}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => startEdit(rubrique)}
-                            disabled={isBusy}
-                            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Modifier
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openDeleteModal(rubrique)}
-                            disabled={isBusy}
-                            className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <ul className="grid grid-cols-1 gap-3 md:hidden">
-              {rubriques.map((rubrique) => (
-                <li
-                  key={rubrique.id}
-                  className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {rubrique.nom}
-                      </p>
-                      <p className="mt-1 text-xs text-gray-500">
-                        Ordre : {rubrique.ordre_affichage}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-1 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => startEdit(rubrique)}
-                      disabled={isBusy}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openDeleteModal(rubrique)}
-                      disabled={isBusy}
-                      className="w-full rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
+      <RubriquesList
+        rubriques={rubriques}
+        isBusy={isBusy}
+        onEdit={startEdit}
+        onDelete={openDeleteModal}
+      />
 
       {rubriqueASupprimer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4"
-          role="presentation"
-          onClick={closeDeleteModal}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="suppression-rubrique-titre"
-            className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3
-              id="suppression-rubrique-titre"
-              className="text-lg font-medium text-gray-900"
-            >
-              Supprimer la rubrique
-            </h3>
-
-            <p className="mt-2 text-sm text-gray-600">
-              Êtes-vous sûr de vouloir supprimer « {rubriqueASupprimer.nom} » ?
-              Cette action est définitive.
-            </p>
-
-            {deleteError && (
-              <p
-                role="alert"
-                className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-              >
-                {deleteError}
-              </p>
-            )}
-
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                disabled={isDeleting}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Annuler
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isDeleting ? (
-                  <>
-                    <Spinner />
-                    <span>Suppression…</span>
-                  </>
-                ) : (
-                  'Supprimer'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteModal
+          rubrique={rubriqueASupprimer}
+          isDeleting={isDeleting}
+          error={deleteError}
+          onCancel={closeDeleteModal}
+          onConfirm={handleDelete}
+        />
       )}
     </section>
   );

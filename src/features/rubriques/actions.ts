@@ -86,11 +86,13 @@ export async function listRubriques(): Promise<Rubrique[]> {
       .returns<Rubrique[]>();
 
     if (error) {
+      console.error('listRubriques: Supabase error', error);
       return [];
     }
 
     return data ?? [];
-  } catch {
+  } catch (error) {
+    console.error('listRubriques: Unexpected error', error);
     return [];
   }
 }
