@@ -10,7 +10,7 @@ import {
   updateContenu,
   type ContenuAvecRubrique,
 } from '@/features/contenus/actions';
-import ContenusForm from './contenus-form';
+import { ContenusForm } from './contenus-form';
 import ContenusList from './contenus-list';
 import DeleteModal from './delete-modal';
 
