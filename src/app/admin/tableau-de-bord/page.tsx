@@ -1,10 +1,13 @@
-"use client";
+import type { Metadata } from 'next';
+import { getBanniere } from '@/features/banniere/actions';
+import BanniereDashboardClient from './banniere-dashboard-client';
 
-export default function DashboardPage() {
-  return (
-    <div>
-      <h1 className="mb-6 text-2xl font-bold">Tableau de bord</h1>
-      <p>Bienvenue sur le tableau de bord</p>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: 'Tableau de bord — Bannière',
+};
+
+export default async function TableauDeBordPage() {
+  const initialBanniere = await getBanniere();
+
+  return <BanniereDashboardClient initialBanniere={initialBanniere} />;
 }
