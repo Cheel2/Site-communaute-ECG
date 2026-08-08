@@ -1,3 +1,5 @@
+export type EvenementType = 'recurrent' | 'special';
+
 export interface Rubrique {
   id: string;
   nom: string;
@@ -38,9 +40,13 @@ export interface Evenement {
   id: string;
   titre: string;
   description: string;
-  date: string;
+  date_debut: string;
+  date_fin: string | null;
+  lieu: string | null;
+  type: EvenementType;
   inscription_requise: boolean;
-  type: 'recurrent' | 'special';
+  image_url: string | null;
+  statut: string;
   date_creation: string;
   date_modification: string;
 }
