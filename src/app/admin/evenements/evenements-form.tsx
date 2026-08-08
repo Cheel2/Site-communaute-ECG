@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Evenement, EvenementType } from "@/types/database";
+import type { Evenement } from "@/types/database";
+
+export type EvenementType = "recurrent" | "special";
 
 export interface EvenementFormValues {
   titre: string;
