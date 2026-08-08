@@ -1,4 +1,4 @@
-// src/types/database.ts — Ajouter à la fin du fichier
+// src/types/database.ts
 
 export interface Contenu {
   id: string;
