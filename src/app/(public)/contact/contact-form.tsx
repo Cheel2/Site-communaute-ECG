@@ -32,7 +32,7 @@ export function ContactForm() {
   }, []);
 
   useEffect(() => {
-    if (formState === 'idle') {
+    if (formState !== 'pending' && formState !== 'success') {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
@@ -57,14 +57,19 @@ export function ContactForm() {
     setFormState('pending');
     setErrorMessage('');
 
-    const result = await submitContact(formData);
+    try {
+      const result = await submitContact(formData);
 
-    if (result.error) {
+      if (result.error) {
+        setFormState('error');
+        setErrorMessage(result.error.message);
+      } else {
+        setFormState('success');
+        localStorage.removeItem(STORAGE_KEY_CONTACT);
+      }
+    } catch {
       setFormState('error');
-      setErrorMessage(result.error.message);
-    } else {
-      setFormState('success');
-      localStorage.removeItem(STORAGE_KEY_CONTACT);
+      setErrorMessage('Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.');
     }
   };
 

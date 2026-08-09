@@ -36,7 +36,7 @@ export function PartenariatForm({ numeroWhatsApp }: PartenariatFormProps) {
   }, []);
 
   useEffect(() => {
-    if (formState === 'idle') {
+    if (formState !== 'pending' && formState !== 'success') {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
@@ -61,20 +61,25 @@ export function PartenariatForm({ numeroWhatsApp }: PartenariatFormProps) {
     setFormState('pending');
     setErrorMessage('');
 
-    const result = await submitPartenariat(formData);
+    try {
+      const result = await submitPartenariat(formData);
 
-    if (result.error) {
-      setFormState('error');
-      setErrorMessage(result.error.message);
-    } else {
-      setFormState('success');
-      localStorage.removeItem(STORAGE_KEY_PARTENARIAT);
+      if (result.error) {
+        setFormState('error');
+        setErrorMessage(result.error.message);
+      } else {
+        setFormState('success');
+        localStorage.removeItem(STORAGE_KEY_PARTENARIAT);
 
-      if (numeroWhatsApp) {
-        const message = `Bonjour, je souhaite devenir partenaire du ministère. Nom: ${formData.nom}, Email: ${formData.email}, Pays: ${formData.pays}`;
-        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank', 'noopener,noreferrer');
+        if (numeroWhatsApp) {
+          const message = `Bonjour, je souhaite devenir partenaire du ministère. Nom: ${formData.nom}, Email: ${formData.email}, Pays: ${formData.pays}`;
+          const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
       }
+    } catch {
+      setFormState('error');
+      setErrorMessage('Impossible de contacter le serveur. Vérifiez votre connexion et réessayez.');
     }
   };
 
