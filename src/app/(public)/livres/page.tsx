@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/anon';
+import { createAnonClient } from '@/lib/supabase/annon';
 import { LivreCard } from './livre-card';
 import type { Livre, Parametre } from '@/types/database';
 import type { Metadata } from 'next';
@@ -6,14 +6,18 @@ import type { Metadata } from 'next';
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = createClient();
+  const supabase = createAnonClient();
   
-  const { data: seo } = await supabase
+  const { data: seo, error: seoError } = await supabase
     .from('page_seo')
     .select('titre, meta_description')
     .eq('chemin', '/livres')
     .single();
 
+  if (seoError && seoError.code !== 'PGRST116') {
+    console.error('Erreur fetch SEO livres:', seoError.message);
+  }
+  
   return {
     title: seo?.titre || 'Nos Livres | Ministère Pastoral',
     description: seo?.meta_description || 'Découvrez nos ouvrages et ressources spirituels. Disponibles à l\'achat sur Amazon ou via WhatsApp.',
@@ -21,18 +25,23 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getLivresEtParametres() {
-  const supabase = createClient();
+  const supabase = createAnonClient();
 
-  const { data: livres, error: livresError } = await supabase
-    .from('livre')
-    .select('*')
-    .order('date_creation', { ascending: false });
+  // Fetch parallèle pour optimiser le temps de chargement (performance)
+  const [livresResult, parametreWAResult] = await Promise.all([
+    supabase
+      .from('livre')
+      .select('*')
+      .order('date_creation', { ascending: false }),
+    supabase
+      .from('parametre')
+      .select('valeur')
+      .eq('cle', 'whatsapp_numero')
+      .single(),
+  ]);
 
-  const { data: parametreWA, error: waError } = await supabase
-    .from('parametre')
-    .select('valeur')
-    .eq('cle', 'whatsapp_numero')
-    .single();
+  const { data: livres, error: livresError } = livresResult;
+  const { data: parametreWA, error: waError } = parametreWAResult;
 
   if (livresError) {
     console.error('Erreur fetch livres:', livresError.message);
@@ -40,7 +49,7 @@ async function getLivresEtParametres() {
   
   // PGRST116 = Not Found (pas de paramètre WA configuré), on l'ignore silencieusement
   if (waError && waError.code !== 'PGRST116') {
-    console.error('Erreur fetch parametre WA:', waError.message);
+    console.error('Erreur fetch paramètre WA:', waError.message);
   }
 
   return {
