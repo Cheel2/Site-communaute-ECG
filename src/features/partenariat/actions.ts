@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { createAnonClient } from '@/lib/supabase/anon';
-import { ApiResponse } from '@/types/api';
+import type { ApiResponse, ApiError } from '@/types/api';
 
 export const partenaireSchema = z.object({
   nom: z.string().min(1, 'Le nom est requis').max(255),
@@ -13,11 +13,32 @@ export const partenaireSchema = z.object({
 
 export type PartenaireFormData = z.infer<typeof partenaireSchema>;
 
-export async function submitPartenariat(data: PartenaireFormData): Promise<ApiResponse<null>> {
-  try {
-    const validated = partenaireSchema.parse(data);
-    const supabase = createAnonClient();
+function erreurValidation(message: string): ApiResponse<null> {
+  const error: ApiError = { code: 'VALIDATION_ERROR', message };
+  return { error };
+}
 
+function erreurInterne(): ApiResponse<null> {
+  const error: ApiError = {
+    code: 'INTERNAL_ERROR',
+    message: 'Une erreur inattendue s\'est produite. Veuillez réessayer.',
+  };
+  return { error };
+}
+
+export async function submitPartenariat(data: PartenaireFormData): Promise<ApiResponse<null>> {
+  let validated: PartenaireFormData;
+  try {
+    validated = partenaireSchema.parse(data);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return erreurValidation(err.errors[0]?.message || 'Données invalides');
+    }
+    return erreurInterne();
+  }
+
+  try {
+    const supabase = createAnonClient();
     const { error } = await supabase.from('partenaire').insert({
       nom: validated.nom,
       email: validated.email,
@@ -25,29 +46,13 @@ export async function submitPartenariat(data: PartenaireFormData): Promise<ApiRe
     });
 
     if (error) {
-      return {
-        error: {
-          code: 'DATABASE_ERROR',
-          message: 'Erreur lors de l\'enregistrement. Veuillez réessayer.',
-        },
-      };
+      console.error('[submitPartenariat] Erreur Supabase:', error.code, error.message);
+      return erreurInterne();
     }
 
     return { data: null };
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: err.errors[0]?.message || 'Données invalides',
-        },
-      };
-    }
-    return {
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Une erreur inattendue s\'est produite.',
-      },
-    };
+    console.error('[submitPartenariat] Exception inattendue:', err);
+    return erreurInterne();
   }
 }

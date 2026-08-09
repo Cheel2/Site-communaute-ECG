@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { createAnonClient } from '@/lib/supabase/anon';
-import { ApiResponse, ApiError } from '@/types/api';
+import type { ApiResponse, ApiError } from '@/types/api';
 
 export const contactSchema = z.object({
   nom: z.string().min(1, 'Le nom est requis').max(255),
@@ -13,11 +13,32 @@ export const contactSchema = z.object({
 
 export type ContactFormData = z.infer<typeof contactSchema>;
 
-export async function submitContact(data: ContactFormData): Promise<ApiResponse<null>> {
-  try {
-    const validated = contactSchema.parse(data);
-    const supabase = createAnonClient();
+function erreurValidation(message: string): ApiResponse<null> {
+  const error: ApiError = { code: 'VALIDATION_ERROR', message };
+  return { error };
+}
 
+function erreurInterne(): ApiResponse<null> {
+  const error: ApiError = {
+    code: 'INTERNAL_ERROR',
+    message: 'Une erreur inattendue s\'est produite. Veuillez réessayer.',
+  };
+  return { error };
+}
+
+export async function submitContact(data: ContactFormData): Promise<ApiResponse<null>> {
+  let validated: ContactFormData;
+  try {
+    validated = contactSchema.parse(data);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return erreurValidation(err.errors[0]?.message || 'Données invalides');
+    }
+    return erreurInterne();
+  }
+
+  try {
+    const supabase = createAnonClient();
     const { error } = await supabase.from('contact').insert({
       nom: validated.nom,
       email: validated.email,
@@ -25,29 +46,13 @@ export async function submitContact(data: ContactFormData): Promise<ApiResponse<
     });
 
     if (error) {
-      return {
-        error: {
-          code: 'DATABASE_ERROR',
-          message: 'Erreur lors de l\'enregistrement. Veuillez réessayer.',
-        },
-      };
+      console.error('[submitContact] Erreur Supabase:', error.code, error.message);
+      return erreurInterne();
     }
 
     return { data: null };
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return {
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: err.errors[0]?.message || 'Données invalides',
-        },
-      };
-    }
-    return {
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Une erreur inattendue s\'est produite.',
-      },
-    };
+    console.error('[submitContact] Exception inattendue:', err);
+    return erreurInterne();
   }
 }
