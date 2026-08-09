@@ -13,12 +13,16 @@
 // sont calculés séparément car ils représentent le cumul historique total,
 // indépendant de la fenêtre glissante 30 jours de la table `statistique`.
 //
-// CORRECTION MC-18 (rev 2) — réalignment des sources de métriques :
+// CORRECTION MC-18 (rev 3) — réalignment des sources de métriques :
 // - Le type réel inséré par la migration 009 (MC-15) est `clic_whatsapp_livre`
-//   (jamais `clic_whatsapp`) : TYPES_STATISTIQUE et l'agrégat corrigés.
+//   (jamais `clic_whatsapp`) : agrégat corrigé.
 // - MC-17 (contact/partenariat) n'insère AUCUNE ligne dans `statistique` :
 //   les métriques formulaires sont comptées depuis les tables sources
 //   `contact` / `partenaire` sur la fenêtre 30 jours.
+// - `visite` N'APPARTIENT PAS à l'union `StatistiqueType` (preuve : build
+//   Codespaces rev 2). TYPES_STATISTIQUE = sous-ensemble justifié limité aux
+//   types réellement émis par le code livré ; `visites30j` maintenu à 0 pour
+//   stabilité du contrat UI (dashboard-stats-client.tsx inchangé, hors périmètre).
 
 "use server";
 
@@ -32,7 +36,13 @@ import type { ApiResponse } from "@/types/api";
 // ---------------------------------------------------------------------------
 
 export interface DashboardStats {
-  /** Fenêtre glissante 30 jours (table statistique) */
+  /**
+   * Fenêtre glissante 30 jours. MAINTENU À 0 : le type `visite` n'existe pas
+   * dans l'union `StatistiqueType` et aucun chemin d'insertion du tracking
+   * visites n'est livré à ce jour. Champ conservé pour ne pas casser le
+   * contrat UI (dashboard-stats-client.tsx) ; à brancher quand le type sera
+   * ajouté à l'union DB + au tracking (périmètre ultérieur).
+   */
   visites30j: number;
   vuesContenus30j: number;
   clicsAmazon30j: number;
@@ -66,26 +76,24 @@ export interface TopLivre {
 const FENETRE_JOURS = 30;
 
 /**
- * Types de la table statistique — alignés EXACTEMENT sur l'union
- * `StatistiqueType` de src/types/database.ts (Master §5.1, CHECK IN 6 valeurs).
- * Le typage `readonly StatistiqueType[]` garantit l'alignement à la compilation.
- *
- * Réalité des chemins d'insertion à ce jour :
+ * SOUS-ENSEMBLE JUSTIFIÉ de l'union `StatistiqueType` (database.ts) :
+ * uniquement les types RÉELLEMENT insérés par le code livré à ce jour.
  * - `vue_contenu` : MC-14 (trackVueContenu) ;
  * - `clic_amazon` : MC-15 (trackClicAmazon) ;
- * - `clic_whatsapp_livre` : MC-15 (migration 009, RPC atomique) ;
- * - `visite` : chemin d'insertion (tracking visites) livré ultérieurement —
- *   la métrique visites30j vaut 0 en attendant (conservée par anticipation) ;
- * - `formulaire_contact` / `formulaire_partenariat` : non insérés par MC-17 —
- *   les métriques formulaires sont comptées depuis les tables sources (ci-dessous).
+ * - `clic_whatsapp_livre` : MC-15 (migration 009, RPC atomique).
+ * Exclusions documentées :
+ * - `visite` : absent de l'union `StatistiqueType` (build rev 2) et aucun
+ *   chemin d'insertion livré ;
+ * - valeurs éventuelles de l'union non émises par le code livré (ex. types
+ *   formulaires) : agrégats nécessairement nuls, métriques formulaires lues
+ *   depuis les tables sources `contact` / `partenaire` (voir getDashboardStats).
+ * Le typage `readonly StatistiqueType[]` garantit l'appartenance à l'union
+ * à la compilation.
  */
 const TYPES_STATISTIQUE: readonly StatistiqueType[] = [
-  "visite",
   "vue_contenu",
   "clic_amazon",
   "clic_whatsapp_livre",
-  "formulaire_contact",
-  "formulaire_partenariat",
 ];
 
 // ---------------------------------------------------------------------------
@@ -151,11 +159,12 @@ export async function getDashboardStats(): Promise<
     if (statsResult.error) return erreurInterne(statsResult.error);
     if (contenusResult.error) return erreurInterne(contenusResult.error);
     if (livresResult.error) return erreurInterne(livresResult.error);
-    if (contactsCountResult.error) return erreurInterne(contactsCountResult.error);
+    if (contactsCountResult.error)
+      return erreurInterne(contactsCountResult.error);
     if (partenairesCountResult.error)
       return erreurInterne(partenairesCountResult.error);
 
-    // --- Agrégation serveur des stats 30j par type ---
+    // --- Agrégation serveur des stats 30j par type (sous-ensemble émis) ---
     const aggregats: Record<string, number> = {};
     for (const type of TYPES_STATISTIQUE) {
       aggregats[type] = 0;
@@ -183,9 +192,9 @@ export async function getDashboardStats(): Promise<
     }
 
     const stats: DashboardStats = {
-      // `visite` conservé car présent dans StatistiqueType ; chemin
-      // d'insertion du tracking visites livré ultérieurement (vaut 0 en attendant).
-      visites30j: aggregats["visite"] ?? 0,
+      // Type `visite` absent de l'union StatistiqueType + aucun tracking
+      // visites livré : métrique maintenue à 0 (contrat UI préservé).
+      visites30j: 0,
       vuesContenus30j: aggregats["vue_contenu"] ?? 0,
       clicsAmazon30j: aggregats["clic_amazon"] ?? 0,
       // Type réel inséré en production : `clic_whatsapp_livre` (migration 009).
