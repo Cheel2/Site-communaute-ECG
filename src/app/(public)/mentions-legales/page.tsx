@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import { anon } from "@/lib/supabase/anon";
+import { createAnonClient } from "@/lib/supabase/anon";
 import type { PageSeo } from "@/types/database";
 import { MENTIONS_LEGALES } from "@/data/legal-content";
 
@@ -15,8 +15,9 @@ const METADONNEES_DEFAUT = {
 
 // cache() déduplique la requête entre generateMetadata et le rendu de la page (même request).
 const lireSeoMentionsLegales = cache(async (): Promise<PageSeo | null> => {
+  // createAnonClient() : fabrique singleton mémoïsée (aucun surcoût par appel).
   // maybeSingle() retourne null sans erreur si la ligne est absente (pas de PGRST116).
-  const { data, error } = await anon
+  const { data, error } = await createAnonClient()
     .from("page_seo")
     .select("*")
     .eq("chemin", CHEMIN_PAGE)
