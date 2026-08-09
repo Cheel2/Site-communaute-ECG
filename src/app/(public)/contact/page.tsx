@@ -10,14 +10,22 @@ const METADONNEES_DEFAUT = {
   description: 'Contactez-nous pour toute question ou demande d\'information.',
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+async function lireSeoContact() {
   const supabase = createAnonClient();
-  const { data: seoData } = await supabase
-    .from('page_seo')
-    .select('*')
-    .eq('chemin', '/contact')
-    .single()
-    .catch(() => ({ data: null }));
+  try {
+    const { data } = await supabase
+      .from('page_seo')
+      .select('*')
+      .eq('chemin', '/contact')
+      .single();
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seoData = await lireSeoContact();
 
   return {
     title: seoData?.titre || METADONNEES_DEFAUT.title,

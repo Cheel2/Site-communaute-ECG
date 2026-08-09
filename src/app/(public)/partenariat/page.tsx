@@ -10,14 +10,36 @@ const METADONNEES_DEFAUT = {
   description: 'Devenez partenaire de notre ministère pastoral.',
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+async function lireSeoPartenariat() {
   const supabase = createAnonClient();
-  const { data: seoData } = await supabase
-    .from('page_seo')
-    .select('*')
-    .eq('chemin', '/partenariat')
-    .single()
-    .catch(() => ({ data: null }));
+  try {
+    const { data } = await supabase
+      .from('page_seo')
+      .select('*')
+      .eq('chemin', '/partenariat')
+      .single();
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function lireNumeroWhatsApp(): Promise<string> {
+  const supabase = createAnonClient();
+  try {
+    const { data } = await supabase
+      .from('parametre')
+      .select('valeur')
+      .eq('cle', 'whatsapp_numero')
+      .single();
+    return data?.valeur || '';
+  } catch {
+    return '';
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seoData = await lireSeoPartenariat();
 
   return {
     title: seoData?.titre || METADONNEES_DEFAUT.title,
@@ -26,15 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PartenariatPage() {
-  const supabase = createAnonClient();
-  const { data: parametreWA } = await supabase
-    .from('parametre')
-    .select('valeur')
-    .eq('cle', 'whatsapp_numero')
-    .single()
-    .catch(() => ({ data: null }));
-
-  const numeroWhatsApp = parametreWA?.valeur || '';
+  const numeroWhatsApp = await lireNumeroWhatsApp();
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-2xl">
