@@ -1,4 +1,4 @@
-import { createAnonClient } from '@/lib/supabase/annon';
+import { createAnonClient } from '@/lib/supabase/anon';
 import { LivreCard } from './livre-card';
 import type { Livre, Parametre } from '@/types/database';
 import type { Metadata } from 'next';
