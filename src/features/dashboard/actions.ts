@@ -12,11 +12,19 @@
 // Les compteurs GLOBAUX (contenu.compteur_vues, livre.compteur_clics_*)
 // sont calculés séparément car ils représentent le cumul historique total,
 // indépendant de la fenêtre glissante 30 jours de la table `statistique`.
+//
+// CORRECTION MC-18 (rev 2) — réalignment des sources de métriques :
+// - Le type réel inséré par la migration 009 (MC-15) est `clic_whatsapp_livre`
+//   (jamais `clic_whatsapp`) : TYPES_STATISTIQUE et l'agrégat corrigés.
+// - MC-17 (contact/partenariat) n'insère AUCUNE ligne dans `statistique` :
+//   les métriques formulaires sont comptées depuis les tables sources
+//   `contact` / `partenaire` sur la fenêtre 30 jours.
 
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { erreurInterne, erreurNonAutorise } from "@/lib/api-errors";
+import type { StatistiqueType } from "@/types/database";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -29,6 +37,7 @@ export interface DashboardStats {
   vuesContenus30j: number;
   clicsAmazon30j: number;
   clicsWhatsapp30j: number;
+  /** Fenêtre 30 jours — comptées depuis les tables contact / partenaire */
   formulairesPartenariat30j: number;
   formulairesContact30j: number;
   /** Compteurs globaux historiques (tables contenu / livre) */
@@ -56,15 +65,28 @@ export interface TopLivre {
 
 const FENETRE_JOURS = 30;
 
-/** Types de la table statistique (Master §5.1 — CHECK IN 6 valeurs) */
-const TYPES_STATISTIQUE = [
+/**
+ * Types de la table statistique — alignés EXACTEMENT sur l'union
+ * `StatistiqueType` de src/types/database.ts (Master §5.1, CHECK IN 6 valeurs).
+ * Le typage `readonly StatistiqueType[]` garantit l'alignement à la compilation.
+ *
+ * Réalité des chemins d'insertion à ce jour :
+ * - `vue_contenu` : MC-14 (trackVueContenu) ;
+ * - `clic_amazon` : MC-15 (trackClicAmazon) ;
+ * - `clic_whatsapp_livre` : MC-15 (migration 009, RPC atomique) ;
+ * - `visite` : chemin d'insertion (tracking visites) livré ultérieurement —
+ *   la métrique visites30j vaut 0 en attendant (conservée par anticipation) ;
+ * - `formulaire_contact` / `formulaire_partenariat` : non insérés par MC-17 —
+ *   les métriques formulaires sont comptées depuis les tables sources (ci-dessous).
+ */
+const TYPES_STATISTIQUE: readonly StatistiqueType[] = [
   "visite",
   "vue_contenu",
   "clic_amazon",
-  "clic_whatsapp",
-  "formulaire_partenariat",
+  "clic_whatsapp_livre",
   "formulaire_contact",
-] as const;
+  "formulaire_partenariat",
+];
 
 // ---------------------------------------------------------------------------
 // getDashboardStats
@@ -89,8 +111,14 @@ export async function getDashboardStats(): Promise<
     dateLimite.setDate(dateLimite.getDate() - FENETRE_JOURS);
     const dateLimiteISO = dateLimite.toISOString();
 
-    // --- Requêtes parallèles (3 sources distinctes) ---
-    const [statsResult, contenusResult, livresResult] = await Promise.all([
+    // --- Requêtes parallèles (5 sources distinctes) ---
+    const [
+      statsResult,
+      contenusResult,
+      livresResult,
+      contactsCountResult,
+      partenairesCountResult,
+    ] = await Promise.all([
       // 1. Table statistique — filtrée sur 30 derniers jours
       supabase
         .from("statistique")
@@ -104,12 +132,28 @@ export async function getDashboardStats(): Promise<
       supabase
         .from("livre")
         .select("compteur_clics_amazon, compteur_clics_whatsapp"),
+
+      // 4. Formulaires contact 30j — comptés depuis la table source
+      //    (MC-17 n'insère aucune ligne dans statistique)
+      supabase
+        .from("contact")
+        .select("id", { count: "exact", head: true })
+        .gte("date_soumission", dateLimiteISO),
+
+      // 5. Formulaires partenariat 30j — comptés depuis la table source
+      supabase
+        .from("partenaire")
+        .select("id", { count: "exact", head: true })
+        .gte("date_soumission", dateLimiteISO),
     ]);
 
     // Gestion erreurs Supabase
     if (statsResult.error) return erreurInterne(statsResult.error);
     if (contenusResult.error) return erreurInterne(contenusResult.error);
     if (livresResult.error) return erreurInterne(livresResult.error);
+    if (contactsCountResult.error) return erreurInterne(contactsCountResult.error);
+    if (partenairesCountResult.error)
+      return erreurInterne(partenairesCountResult.error);
 
     // --- Agrégation serveur des stats 30j par type ---
     const aggregats: Record<string, number> = {};
@@ -139,12 +183,16 @@ export async function getDashboardStats(): Promise<
     }
 
     const stats: DashboardStats = {
+      // `visite` conservé car présent dans StatistiqueType ; chemin
+      // d'insertion du tracking visites livré ultérieurement (vaut 0 en attendant).
       visites30j: aggregats["visite"] ?? 0,
       vuesContenus30j: aggregats["vue_contenu"] ?? 0,
       clicsAmazon30j: aggregats["clic_amazon"] ?? 0,
-      clicsWhatsapp30j: aggregats["clic_whatsapp"] ?? 0,
-      formulairesPartenariat30j: aggregats["formulaire_partenariat"] ?? 0,
-      formulairesContact30j: aggregats["formulaire_contact"] ?? 0,
+      // Type réel inséré en production : `clic_whatsapp_livre` (migration 009).
+      clicsWhatsapp30j: aggregats["clic_whatsapp_livre"] ?? 0,
+      // Sources : tables contact / partenaire (fenêtre 30j), pas statistique.
+      formulairesContact30j: contactsCountResult.count ?? 0,
+      formulairesPartenariat30j: partenairesCountResult.count ?? 0,
       totalVuesContenus,
       totalClicsAmazon,
       totalClicsWhatsapp,
