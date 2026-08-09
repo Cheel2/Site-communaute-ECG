@@ -1,18 +1,80 @@
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { ApiResponse } from '@/types/api';
+
 // ============================================================================
-// EXTENSION DU FICHIER EXISTANT : src/features/tracking/actions.ts
-// AJOUTER ces fonctions à la suite du code existant.
-// PRÉREQUIS : Le client service_role (ex: supabaseServiceRole) et le type ApiResponse 
-// doivent déjà être importés/définis en haut de ce fichier.
+// CLIENT SERVICE_ROLE ISOLÉ (D9)
+// Ce client contourne les RLS pour insérer dans la table statistique.
+// Il ne doit JAMAIS être importé ou utilisé dans un composant client ('use client').
+// ============================================================================
+const supabaseServiceRole: SupabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+);
+
+/**
+ * Valide le format d'un identifiant UUID pour prévenir les injections ou erreurs SQL.
+ */
+function estUuidValide(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+}
+
+// ============================================================================
+// FONCTIONS EXISTANTES (MICRO-CYCLE 14)
 // ============================================================================
 
-import type { ApiResponse } from '@/types/api';
-// import { supabaseServiceRole } from './client'; // Déjà présent dans le fichier
+/**
+ * Tracke une vue sur un contenu éditorial.
+ * L'anti-spam (FR-3) est géré côté client (view-tracker.tsx).
+ */
+export async function trackVueContenu(contenuId: string): Promise<ApiResponse<null>> {
+  if (!estUuidValide(contenuId)) {
+    return { 
+      error: { code: 'VALIDATION_ERROR', message: 'Identifiant de contenu invalide.' } 
+    };
+  }
+
+  try {
+    const { error } = await supabaseServiceRole.rpc('incrementer_compteur_vues', {
+      contenu_id: contenuId,
+    });
+
+    if (error) {
+      console.error('Erreur RPC incrementer_compteur_vues:', error.message);
+      return { 
+        error: { code: 'INTERNAL_ERROR', message: "Impossible d'enregistrer la vue du contenu." } 
+      };
+    }
+
+    return { data: null };
+  } catch (err) {
+    console.error('Exception trackVueContenu:', err);
+    return { 
+      error: { code: 'INTERNAL_ERROR', message: 'Une erreur inattendue est survenue lors du tracking.' } 
+    };
+  }
+}
+
+// ============================================================================
+// NOUVELLES FONCTIONS (MICRO-CYCLE 15)
+// ============================================================================
 
 /**
  * Tracke un clic sur le lien Amazon d'un livre.
- * Utilise le client service_role pour bypasser les RLS sur la table statistique.
  */
 export async function trackClicAmazon(livreId: string): Promise<ApiResponse<null>> {
+  if (!estUuidValide(livreId)) {
+    return { 
+      error: { code: 'VALIDATION_ERROR', message: 'Identifiant de livre invalide.' } 
+    };
+  }
+
   try {
     const { error } = await supabaseServiceRole.rpc('incrementer_clic_amazon', {
       livre_id: livreId,
@@ -21,10 +83,7 @@ export async function trackClicAmazon(livreId: string): Promise<ApiResponse<null
     if (error) {
       console.error('Erreur RPC incrementer_clic_amazon:', error.message);
       return { 
-        error: { 
-          code: 'INTERNAL_ERROR', 
-          message: 'Impossible d\'enregistrer le clic Amazon.' 
-        } 
+        error: { code: 'INTERNAL_ERROR', message: "Impossible d'enregistrer le clic Amazon." } 
       };
     }
 
@@ -32,19 +91,21 @@ export async function trackClicAmazon(livreId: string): Promise<ApiResponse<null
   } catch (err) {
     console.error('Exception trackClicAmazon:', err);
     return { 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: 'Une erreur inattendue s\'est produite lors du tracking.' 
-      } 
+      error: { code: 'INTERNAL_ERROR', message: 'Une erreur inattendue est survenue lors du tracking.' } 
     };
   }
 }
 
 /**
  * Tracke un clic sur le lien WhatsApp d'un livre.
- * Utilise le client service_role pour bypasser les RLS sur la table statistique.
  */
 export async function trackClicWhatsappLivre(livreId: string): Promise<ApiResponse<null>> {
+  if (!estUuidValide(livreId)) {
+    return { 
+      error: { code: 'VALIDATION_ERROR', message: 'Identifiant de livre invalide.' } 
+    };
+  }
+
   try {
     const { error } = await supabaseServiceRole.rpc('incrementer_clic_whatsapp_livre', {
       livre_id: livreId,
@@ -53,10 +114,7 @@ export async function trackClicWhatsappLivre(livreId: string): Promise<ApiRespon
     if (error) {
       console.error('Erreur RPC incrementer_clic_whatsapp_livre:', error.message);
       return { 
-        error: { 
-          code: 'INTERNAL_ERROR', 
-          message: 'Impossible d\'enregistrer le clic WhatsApp.' 
-        } 
+        error: { code: 'INTERNAL_ERROR', message: "Impossible d'enregistrer le clic WhatsApp." } 
       };
     }
 
@@ -64,10 +122,7 @@ export async function trackClicWhatsappLivre(livreId: string): Promise<ApiRespon
   } catch (err) {
     console.error('Exception trackClicWhatsappLivre:', err);
     return { 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: 'Une erreur inattendue s\'est produite lors du tracking.' 
-      } 
+      error: { code: 'INTERNAL_ERROR', message: 'Une erreur inattendue est survenue lors du tracking.' } 
     };
   }
 }
