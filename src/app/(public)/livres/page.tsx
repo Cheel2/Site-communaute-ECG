@@ -5,57 +5,76 @@ import type { Metadata } from 'next';
 
 export const revalidate = 3600;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const supabase = createAnonClient();
-  
-  const { data: seo, error: seoError } = await supabase
-    .from('page_seo')
-    .select('titre, meta_description')
-    .eq('chemin', '/livres')
-    .single();
+const SEO_DEFAUT = {
+  title: 'Nos Livres | Ministère Pastoral',
+  description:
+    "Découvrez nos ouvrages et ressources spirituels. Disponibles à l'achat sur Amazon ou via WhatsApp.",
+};
 
-  if (seoError && seoError.code !== 'PGRST116') {
-    console.error('Erreur fetch SEO livres:', seoError.message);
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const supabase = createAnonClient();
+
+    const { data: seo } = await supabase
+      .from('page_seo')
+      .select('titre, meta_description')
+      .eq('chemin', '/livres')
+      .single();
+
+    return {
+      title: seo?.titre || SEO_DEFAUT.title,
+      description: seo?.meta_description || SEO_DEFAUT.description,
+    };
+  } catch (erreur) {
+    // Résilience build-time (pattern MC-12/13/14) : ne jamais casser le build
+    // si Supabase est indisponible (ex: variables d'environnement absentes).
+    console.error('Erreur SEO page livres:', erreur);
+    return SEO_DEFAUT;
   }
-  
-  return {
-    title: seo?.titre || 'Nos Livres | Ministère Pastoral',
-    description: seo?.meta_description || 'Découvrez nos ouvrages et ressources spirituels. Disponibles à l\'achat sur Amazon ou via WhatsApp.',
-  };
 }
 
-async function getLivresEtParametres() {
-  const supabase = createAnonClient();
+async function getLivresEtParametres(): Promise<{
+  livres: Livre[];
+  numeroWhatsApp: string;
+}> {
+  try {
+    const supabase = createAnonClient();
 
-  // Fetch parallèle pour optimiser le temps de chargement (performance)
-  const [livresResult, parametreWAResult] = await Promise.all([
-    supabase
-      .from('livre')
-      .select('*')
-      .order('date_creation', { ascending: false }),
-    supabase
-      .from('parametre')
-      .select('valeur')
-      .eq('cle', 'whatsapp_numero')
-      .single(),
-  ]);
+    // Fetch parallèle pour optimiser le temps de chargement (performance)
+    const [livresResult, parametreWAResult] = await Promise.all([
+      supabase
+        .from('livre')
+        .select('*')
+        .order('date_creation', { ascending: false }),
+      supabase
+        .from('parametre')
+        .select('valeur')
+        .eq('cle', 'whatsapp_numero')
+        .single(),
+    ]);
 
-  const { data: livres, error: livresError } = livresResult;
-  const { data: parametreWA, error: waError } = parametreWAResult;
+    const { data: livres, error: livresError } = livresResult;
+    const { data: parametreWA, error: waError } = parametreWAResult;
 
-  if (livresError) {
-    console.error('Erreur fetch livres:', livresError.message);
+    if (livresError) {
+      console.error('Erreur fetch livres:', livresError.message);
+    }
+
+    // PGRST116 = Not Found (pas de paramètre WA configuré), on l'ignore silencieusement
+    if (waError && waError.code !== 'PGRST116') {
+      console.error('Erreur fetch paramètre WA:', waError.message);
+    }
+
+    return {
+      livres: (livres as Livre[]) ?? [],
+      numeroWhatsApp: (parametreWA as Parametre)?.valeur ?? '',
+    };
+  } catch (erreur) {
+    // Fallback documenté : variables manquantes ou réseau indisponible au build
+    // → page vide (empty state), mais le build passe.
+    console.error('Erreur fetch page livres:', erreur);
+    return { livres: [], numeroWhatsApp: '' };
   }
-  
-  // PGRST116 = Not Found (pas de paramètre WA configuré), on l'ignore silencieusement
-  if (waError && waError.code !== 'PGRST116') {
-    console.error('Erreur fetch paramètre WA:', waError.message);
-  }
-
-  return {
-    livres: (livres as Livre[]) || [],
-    numeroWhatsApp: (parametreWA as Parametre)?.valeur || '',
-  };
 }
 
 export default async function PageLivres() {
@@ -79,10 +98,10 @@ export default async function PageLivres() {
       ) : (
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {livres.map((livre) => (
-            <LivreCard 
-              key={livre.id} 
-              livre={livre} 
-              numeroWhatsApp={numeroWhatsApp} 
+            <LivreCard
+              key={livre.id}
+              livre={livre}
+              numeroWhatsApp={numeroWhatsApp}
             />
           ))}
         </div>
