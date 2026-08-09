@@ -1,27 +1,27 @@
-// src/features/contact/actions.ts
+// src/features/partenariat/actions.ts
 'use server';
 
 import { z } from 'zod';
 import { createAnonClient } from '@/lib/supabase/anon';
-import { ApiResponse, ApiError } from '@/types/api';
+import { ApiResponse } from '@/types/api';
 
-export const contactSchema = z.object({
+export const partenaireSchema = z.object({
   nom: z.string().min(1, 'Le nom est requis').max(255),
   email: z.string().email('Email invalide').max(255),
-  message: z.string().min(10, 'Le message doit contenir au moins 10 caractères').max(5000),
+  pays: z.string().min(1, 'Le pays est requis').max(255),
 });
 
-export type ContactFormData = z.infer<typeof contactSchema>;
+export type PartenaireFormData = z.infer<typeof partenaireSchema>;
 
-export async function submitContact(data: ContactFormData): Promise<ApiResponse<null>> {
+export async function submitPartenariat(data: PartenaireFormData): Promise<ApiResponse<null>> {
   try {
-    const validated = contactSchema.parse(data);
+    const validated = partenaireSchema.parse(data);
     const supabase = createAnonClient();
 
-    const { error } = await supabase.from('contact').insert({
+    const { error } = await supabase.from('partenaire').insert({
       nom: validated.nom,
       email: validated.email,
-      message: validated.message,
+      pays: validated.pays,
     });
 
     if (error) {
