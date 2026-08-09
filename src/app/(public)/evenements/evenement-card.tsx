@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Evenement } from '@/types/database';
-import { formaterDate, extraireExtraitTexte } from '@/lib/format';
+import { formatterDateFrancaise, extraireExtraitTexte } from '@/lib/format';
 
 interface EvenementCardProps {
   evenement: Evenement;
@@ -20,16 +20,16 @@ export function EvenementCard({ evenement, numeroWhatsApp }: EvenementCardProps)
     try {
       const message = `Inscription à l'événement : ${evenement.titre}`;
       const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(message)}`;
-      // Note : window.open n'accepte pas l'attribut HTML 'rel', mais les windowFeatures 
-      // 'noopener,noreferrer' remplissent exactement la même fonction de sécurité.
+      // window.open n'accepte pas l'attribut HTML `rel` :
+      // les windowFeatures `noopener,noreferrer` assurent la même isolation de sécurité.
       window.open(url, '_blank', 'noopener,noreferrer');
     } finally {
       setIsPending(false);
     }
   };
 
-  const badgeClasses = evenement.type === 'recurrent' 
-    ? 'bg-blue-100 text-blue-800' 
+  const badgeClasses = evenement.type === 'recurrent'
+    ? 'bg-blue-100 text-blue-800'
     : 'bg-amber-100 text-amber-800';
 
   const badgeLabel = evenement.type === 'recurrent' ? 'Récurrent' : 'Spécial';
@@ -48,7 +48,7 @@ export function EvenementCard({ evenement, numeroWhatsApp }: EvenementCardProps)
         </div>
       )}
       <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2">
           <span className={`px-2 py-1 text-xs font-semibold rounded ${badgeClasses}`}>
             {badgeLabel}
           </span>
@@ -59,12 +59,12 @@ export function EvenementCard({ evenement, numeroWhatsApp }: EvenementCardProps)
         </p>
         <div className="text-sm text-gray-500 space-y-1 mb-4">
           <p>
-            📅 {formaterDate(evenement.date_debut)}
-            {evenement.date_fin ? ` - ${formaterDate(evenement.date_fin)}` : ''}
+            📅 {formatterDateFrancaise(evenement.date_debut)}
+            {evenement.date_fin ? ` - ${formatterDateFrancaise(evenement.date_fin)}` : ''}
           </p>
           {evenement.lieu && <p>📍 {evenement.lieu}</p>}
         </div>
-        
+
         {evenement.inscription_requise && numeroWhatsApp && (
           <button
             onClick={handleWhatsAppClick}
