@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { PublicFooter } from '@/components/public/Footer';
 import { PublicHeader } from '@/components/public/Header';
+import { CookieBanner } from '@/components/public/cookie-banner';
 import { createAnonClient } from '@/lib/supabase/anon';
 import type { PageSeo } from '@/types/database';
 
@@ -55,6 +56,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <PublicHeader />
       <main className="flex-1">{children}</main>
       <PublicFooter />
+      <CookieBanner />
     </div>
   );
 }
