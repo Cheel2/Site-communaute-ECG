@@ -1,0 +1,21 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  outputDir: 'playwright-report',
+  use: {
+    baseURL: 'http://localhost:3000',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    port: 3000,
+    reuseExistingServer: true,
+    timeout: 30000,
+  },
+});
