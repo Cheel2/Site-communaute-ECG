@@ -1,0 +1,1 @@
+// Fichier vide pour l'instant (préparer l'infrastructure pour les setup futurs)
