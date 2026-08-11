@@ -26,14 +26,5 @@ yarn-error.log*
 # Local env files
 .env*.local
 .env
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE
-.vscode/
-.idea/
+.env.test
+.env.test.txt
