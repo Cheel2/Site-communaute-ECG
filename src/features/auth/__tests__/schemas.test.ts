@@ -1,5 +1,4 @@
 
-```typescript
 import { describe, it, expect } from 'vitest';
 import { loginSchema, resetPasswordSchema, newPasswordSchema } from '../schemas';
 
