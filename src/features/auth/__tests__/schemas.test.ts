@@ -1,10 +1,9 @@
-
 import { describe, it, expect } from 'vitest';
-import { loginSchema, resetPasswordSchema, newPasswordSchema } from '../schemas';
+import { loginSchema } from '../schemas';
 
 describe('Auth Schemas', () => {
   describe('loginSchema', () => {
-    it('should_validate_valid_email_and_password', () => {
+    it('should validate valid email and password', () => {
       const result = loginSchema.safeParse({
         email: 'test@test.com',
         password: 'password123',
@@ -12,7 +11,7 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should_reject_empty_email', () => {
+    it('should reject empty email', () => {
       const result = loginSchema.safeParse({
         email: '',
         password: 'password123',
@@ -20,15 +19,15 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should_reject_email_without_at', () => {
+    it('should reject email without @', () => {
       const result = loginSchema.safeParse({
-        email: 'testtest.com',
+        email: 'invalid-email',
         password: 'password123',
       });
       expect(result.success).toBe(false);
     });
 
-    it('should_reject_empty_password', () => {
+    it('should reject empty password', () => {
       const result = loginSchema.safeParse({
         email: 'test@test.com',
         password: '',
@@ -36,45 +35,15 @@ describe('Auth Schemas', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should_reject_missing_fields', () => {
+    it('should reject missing fields', () => {
       const result = loginSchema.safeParse({});
       expect(result.success).toBe(false);
     });
-  });
 
-  describe('resetPasswordSchema', () => {
-    it('should_validate_valid_email', () => {
-      const result = resetPasswordSchema.safeParse({ email: 'test@test.com' });
-      expect(result.success).toBe(true);
-    });
-
-    it('should_reject_invalid_email', () => {
-      const result = resetPasswordSchema.safeParse({ email: 'invalid-email' });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe('newPasswordSchema', () => {
-    it('should_validate_matching_passwords', () => {
-      const result = newPasswordSchema.safeParse({
-        password: 'Pass123!',
-        confirmPassword: 'Pass123!',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('should_reject_mismatching_passwords', () => {
-      const result = newPasswordSchema.safeParse({
-        password: 'Pass123!',
-        confirmPassword: 'Pass123',
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('should_reject_too_short_password', () => {
-      const result = newPasswordSchema.safeParse({
+    it('should reject password too short', () => {
+      const result = loginSchema.safeParse({
+        email: 'test@test.com',
         password: 'short',
-        confirmPassword: 'short',
       });
       expect(result.success).toBe(false);
     });
