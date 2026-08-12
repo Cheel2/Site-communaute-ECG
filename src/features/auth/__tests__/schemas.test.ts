@@ -1,4 +1,3 @@
-### src/features/auth/__tests__/schemas.test.ts
 
 ```typescript
 import { describe, it, expect } from 'vitest';
