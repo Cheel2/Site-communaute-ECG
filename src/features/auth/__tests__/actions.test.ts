@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockCreateServerClient } from '@/test/__mocks__/supabase';
+import { mockCreateServerClient } from '../../../test/mocks/supabase';
 import { login, logout, resetPassword, newPassword } from '../actions';
 
 vi.mock('@/lib/supabase/server', () => ({
