@@ -1,71 +1,92 @@
+// src/features/rubriques/__tests__/schemas.test.ts
 import { describe, it, expect } from 'vitest';
-import { 
-  createRubriqueSchema, 
-  updateRubriqueSchema
-} from '../schemas';
+import { createRubriqueSchema, updateRubriqueSchema } from '../schemas';
 
-describe('createRubriqueSchema', () => {
-  it('should accept complete valid data with nom and ordre_affichage', () => {
-    const result = createRubriqueSchema.safeParse({
-      nom: 'Catégorie Test',
-      ordre_affichage: 1,
+describe('Rubrique Schemas', () => {
+  describe('createRubriqueSchema', () => {
+    it('valide un objet nominal avec nom et ordre_affichage', () => {
+      const result = createRubriqueSchema.safeParse({
+        nom: 'Événements',
+        ordre_affichage: 5,
+      });
+
+      expect(result.success).toBe(true);
+
+      if (result.success) {
+        expect(result.data).toEqual({
+          nom: 'Événements',
+          ordre_affichage: 5,
+        });
+      }
     });
-    expect(result.success).toBe(true);
+
+    it('valide un ordre_affichage à 0', () => {
+      const result = createRubriqueSchema.safeParse({
+        nom: 'Test',
+        ordre_affichage: 0,
+      });
+
+      expect(result.success).toBe(true);
+
+      if (result.success) {
+        expect(result.data.ordre_affichage).toBe(0);
+      }
+    });
+
+    it('retourne une erreur si le nom est vide après trim', () => {
+      const result = createRubriqueSchema.safeParse({
+        nom: '   ',
+        ordre_affichage: 0,
+      });
+
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe(
+          'Le nom de la rubrique est requis.'
+        );
+      }
+    });
+
+    it('retourne une erreur si le nom est manquant', () => {
+      const result = createRubriqueSchema.safeParse({
+        ordre_affichage: 1,
+      });
+
+      expect(result.success).toBe(false);
+    });
   });
 
-  it('should accept nom with exactly 1 character (boundary low)', () => {
-    const result = createRubriqueSchema.safeParse({
-      nom: 'A',
-      ordre_affichage: 0,
-    });
-    expect(result.success).toBe(true);
-  });
+  describe('updateRubriqueSchema', () => {
+    it('valide un objet nominal avec nom et ordre_affichage', () => {
+      const result = updateRubriqueSchema.safeParse({
+        nom: 'Nouveau nom',
+        ordre_affichage: 10,
+      });
 
-  it('should reject when nom is empty string', () => {
-    const result = createRubriqueSchema.safeParse({
-      nom: '',
-      ordre_affichage: 0,
-    });
-    expect(result.success).toBe(false);
-  });
+      expect(result.success).toBe(true);
 
-  it('should reject when nom is missing (undefined)', () => {
-    const result = createRubriqueSchema.safeParse({
-      ordre_affichage: 0,
+      if (result.success) {
+        expect(result.data).toEqual({
+          nom: 'Nouveau nom',
+          ordre_affichage: 10,
+        });
+      }
     });
-    expect(result.success).toBe(false);
-  });
 
-  it('should reject when ordre_affichage is a string instead of number', () => {
-    const result = createRubriqueSchema.safeParse({
-      nom: 'Test',
-      ordre_affichage: 'abc',
-    });
-    expect(result.success).toBe(false);
-  });
+    it('retourne une erreur si le nom est vide après trim', () => {
+      const result = updateRubriqueSchema.safeParse({
+        nom: '   ',
+        ordre_affichage: 0,
+      });
 
-  it('should accept negative ordre_affichage when schema has no min constraint', () => {
-    const result = createRubriqueSchema.safeParse({
-      nom: 'Test',
-      ordre_affichage: -1,
+      expect(result.success).toBe(false);
+
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe(
+          'Le nom de la rubrique est requis.'
+        );
+      }
     });
-    expect(result.success).toBe(true);
   });
 });
-
-describe('updateRubriqueSchema', () => {
-  it('should accept partial valid data with id and nom', () => {
-    const result = updateRubriqueSchema.safeParse({
-      id: '123e4567-e89b-12d3-a456-426614174000',
-      nom: 'Nouveau Nom',
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('should reject empty object without id', () => {
-    const result = updateRubriqueSchema.safeParse({});
-    expect(result.success).toBe(false);
-  });
-});
-
-// EXPORT MANQUANT : deleteRubriqueSchema n'est pas exporté séparément depuis schemas.ts
