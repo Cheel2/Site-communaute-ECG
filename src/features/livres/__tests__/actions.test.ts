@@ -395,7 +395,6 @@ describe('deleteLivre', () => {
       from: vi.fn().mockImplementation(() => ({
         delete: vi.fn().mockImplementation(() => ({
           eq: vi.fn().mockImplementation(() => {
-            // Simuler l'appel sans select
             return Promise.resolve({ error: null });
           }),
         })),
@@ -426,7 +425,6 @@ describe('uploadCouverture', () => {
     return new File(['dummy content'], name, { type });
   };
 
-  // Helper pour créer FormData avec un fichier
   const createFormDataWithFile = (file: File): FormData => {
     const formData = new FormData();
     formData.append('file', file);
@@ -434,7 +432,7 @@ describe('uploadCouverture', () => {
   };
 
   it('should upload image and return URL', async () => {
-    const file = createMockFile('image.jpg', 'image/jpeg', 1024 * 1024); // 1MB
+    const file = createMockFile('image.jpg', 'image/jpeg', 1024 * 1024);
     const formData = createFormDataWithFile(file);
 
     const mockStorage = createStorageMock({ error: null });
@@ -472,11 +470,15 @@ describe('uploadCouverture', () => {
   });
 
   it('should return VALIDATION_ERROR when file exceeds 5MB', async () => {
-    const file = createMockFile('large.jpg', 'image/jpeg', 6 * 1024 * 1024); // 6MB
-    const formData = createFormDataWithFile(file);
+    // Utiliser un ArrayBuffer pour garantir la taille
+    const largeContent = new ArrayBuffer(6 * 1024 * 1024);
+    const file = new File([largeContent], 'large.jpg', { type: 'image/jpeg' });
+    const formData = new FormData();
+    formData.append('file', file);
 
     const result = await uploadCouverture(formData);
 
+    expect(result.error).toBeDefined();
     expect(result.error?.code).toBe('VALIDATION_ERROR');
     expect(result.error?.message).toBe('Fichier trop lourd. Taille maximale autorisée : 5 Mo.');
   });
@@ -529,7 +531,7 @@ describe('uploadCouverture', () => {
     await uploadCouverture(formData);
 
     const uploadCall = mockStorage.storage.from().upload.mock.calls[0];
-    const filePath = uploadCall[0]; // filePath
+    const filePath = uploadCall[0];
     expect(filePath).toMatch(/\.png$/);
   });
 
