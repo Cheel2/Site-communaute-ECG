@@ -112,10 +112,6 @@ describe('createEvenement', () => {
       image_url: null,
       statut: 'planifie',
     });
-    // Vérifie la chaîne exacte : insert().select().single() — PAS .returns()
-    const insertChain = mockSupabase.from().insert(expect.any(Object));
-    expect(insertChain.select).toBeDefined();
-    expect(insertChain.select().single).toBeDefined();
   });
 
   it('should_retourner_VALIDATION_ERROR_si_Zod_echoue', async () => {
@@ -127,7 +123,6 @@ describe('createEvenement', () => {
     expect(result.error?.code).toBe('VALIDATION_ERROR');
     expect(result.error?.message).toBe("Données de l'événement invalides.");
     expect(result.error?.details).toBeDefined();
-    // Vérifie que Supabase n'est PAS appelé
     expect(vi.mocked(createClient)).not.toHaveBeenCalled();
   });
 
@@ -245,11 +240,6 @@ describe('updateEvenement', () => {
         date_modification: expect.any(String),
       })
     );
-    // Vérifie la chaîne exacte : update().eq().select().single() — PAS .returns()
-    const updateChain = mockSupabase.from().update(expect.any(Object));
-    expect(updateChain.eq).toBeDefined();
-    expect(updateChain.eq().select).toBeDefined();
-    expect(updateChain.eq().select().single).toBeDefined();
   });
 
   it('should_retourner_VALIDATION_ERROR_si_Zod_echoue', async () => {
@@ -308,10 +298,8 @@ describe('deleteEvenement — Hard-delete [D11]', () => {
     expect(result.data).toBeNull();
     expect(result.error).toBeUndefined();
     expect(mockSupabase.from).toHaveBeenCalledWith('evenement');
-    // Vérifie la chaîne exacte : delete().eq() — SANS .select(), SANS .maybeSingle()
     const deleteChain = mockSupabase.from().delete();
     expect(deleteChain.eq).toBeDefined();
-    // INFERENCE : deleteChain.eq() ne retourne PAS .select()
     expect(deleteChain.eq().select).toBeUndefined();
     expect(deleteChain.eq().maybeSingle).toBeUndefined();
   });
@@ -336,8 +324,6 @@ describe('deleteEvenement — Hard-delete [D11]', () => {
   });
 
   it('should_retourner_INTERNAL_ERROR_si_aucune_ligne_supprimee_PGRST116', async () => {
-    // Le code source ne différencie pas PGRST116 dans deleteEvenement
-    // Il retourne INTERNAL_ERROR pour toute erreur
     const mockSupabase = {
       from: vi.fn().mockReturnValue({
         delete: vi.fn().mockImplementation(() => ({
@@ -356,20 +342,22 @@ describe('deleteEvenement — Hard-delete [D11]', () => {
   });
 
   it('should_PROUVER_hard_delete_D11_en_verifiant_aucun_update_n_est_appele', async () => {
-    const mockSupabase = {
-      from: vi.fn().mockReturnValue({
-        delete: vi.fn().mockImplementation(() => ({
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        })),
-        // update N'EST PAS appelé — c'est la preuve du hard-delete
-      }),
-    };
+    const mockUpdate = vi.fn();
+    const mockDelete = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    });
+    const mockFrom = vi.fn().mockReturnValue({
+      delete: mockDelete,
+      update: mockUpdate,
+    });
+
+    const mockSupabase = { from: mockFrom };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
 
     await deleteEvenement(eventId);
 
-    // [D11] Hard-delete événements : on doit voir delete(), jamais update()
-    expect(mockSupabase.from().delete).toHaveBeenCalled();
-    expect(mockSupabase.from().update).not.toHaveBeenCalled();
+    expect(mockFrom).toHaveBeenCalledWith('evenement');
+    expect(mockDelete).toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });

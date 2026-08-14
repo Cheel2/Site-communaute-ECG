@@ -1,0 +1,56 @@
+========================================
+RAPPORT TMC-5 — FICHIERS CORRIGÉS
+Date : Fri Aug 14 19:49:09 UTC 2026
+Commit : 2f0e4a0
+========================================
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90m/workspaces/Site-communaute-ECG[39m
+
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mlistEvenements[2m > [22mshould_retourner_la_liste_des_evenements_en_cas_de_succes[32m 6[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mlistEvenements[2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mlistEvenements[2m > [22mshould_retourner_une_liste_vide_si_aucun_evenement[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mcreateEvenement[2m > [22mshould_creer_un_evenement_avec_donnees_valides[32m 2[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mcreateEvenement[2m > [22mshould_retourner_VALIDATION_ERROR_si_Zod_echoue[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mcreateEvenement[2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mcreateEvenement[2m > [22mshould_convertir_date_fin_empty_string_en_null[32m 2[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mcreateEvenement[2m > [22mshould_utiliser_statut_planifie_par_defaut_si_non_fourni[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mupdateEvenement[2m > [22mshould_mettre_a_jour_un_evenement_avec_donnees_valides[32m 2[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mupdateEvenement[2m > [22mshould_retourner_VALIDATION_ERROR_si_Zod_echoue[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mupdateEvenement[2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue_PGRST116_row_not_found[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mdeleteEvenement — Hard-delete [D11][2m > [22mshould_supprimer_un_evenement_et_retourner_null_en_cas_de_succes[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mdeleteEvenement — Hard-delete [D11][2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mdeleteEvenement — Hard-delete [D11][2m > [22mshould_retourner_INTERNAL_ERROR_si_aucune_ligne_supprimee_PGRST116[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/actions.test.ts[2m > [22mdeleteEvenement — Hard-delete [D11][2m > [22mshould_PROUVER_hard_delete_D11_en_verifiant_aucun_update_n_est_appele[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_un_evenement_recurrent_valide[32m 4[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_un_evenement_special_valide[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_date_fin_egale_a_date_debut[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_lieu_null_et_image_url_null[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_statut_optionnel_avec_valeur_par_defaut[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — type[2m > [22mshould_rejeter_type_invalide_autre_que_recurrent_ou_special[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — type[2m > [22mshould_rejeter_type_avec_typo_mineure[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — type[2m > [22mshould_rejeter_type_avec_majuscule[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — champs obligatoires[2m > [22mshould_rejeter_titre_vide[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — champs obligatoires[2m > [22mshould_rejeter_titre_manquant[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — champs obligatoires[2m > [22mshould_rejeter_date_debut_manquante[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — champs obligatoires[2m > [22mshould_accepter_description_manquante_avec_valeur_par_defaut[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — format des dates[2m > [22mshould_rejeter_date_debut_format_invalide[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — format des dates[2m > [22mshould_accepter_date_debut_avec_heure_parce_que_DateParse_laccepte[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — format des dates[2m > [22mshould_accepter_date_fin_vide_ou_null[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mcas limites — format des dates[2m > [22mshould_accepter_date_fin_avec_slash_parce_que_DateParse_laccepte[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mÉCART PLAN/CODE — date_fin >= date_debut[2m > [22mshould_ACCEPTER_date_fin_inferieure_a_date_debut_ecart_documente[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/evenements/__tests__/schemas.test.ts[2m > [22mcreateEvenementSchema[2m > [22mmise à jour — héritage du même schéma[2m > [22mshould_avoir_le_meme_schema_que_createEvenementSchema[32m 0[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m33 passed[39m[22m[90m (33)[39m
+[2m   Start at [22m 19:49:10
+[2m   Duration [22m 567ms[2m (transform 123ms, setup 22ms, import 181ms, tests 33ms, environment 0ms)[22m
+
+
+========================================
+FIN DU RAPPORT TMC-5
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-5_20260814_194909.txt
+========================================
