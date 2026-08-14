@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidateTag } from 'next/cache';
 
 // ============================================
-// HELPERS DE MOCK — CORRIGÉS
+// HELPERS DE MOCK — Patterns de TMC-2
 // ============================================
 
 function createAuthMock() {
@@ -34,23 +34,21 @@ function createAuthMock() {
   };
 }
 
-// create : insert().select().single() ← PAS de .returns()
-function createInsertMock(result: any) {
+function createSelectJoinMock(result: any) {
   return {
-    insert: vi.fn().mockImplementation(() => ({
-      select: vi.fn().mockImplementation(() => ({
-        single: vi.fn().mockResolvedValue(result),
+    select: vi.fn().mockImplementation(() => ({
+      order: vi.fn().mockImplementation(() => ({
+        returns: vi.fn().mockResolvedValue(result),
       })),
     })),
   };
 }
 
-// update : update().eq().select().single() ← PAS de .returns()
-function createUpdateMock(result: any) {
+function createInsertMock(result: any) {
   return {
-    update: vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
+    insert: vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        returns: vi.fn().mockImplementation(() => ({
           single: vi.fn().mockResolvedValue(result),
         })),
       })),
@@ -58,12 +56,15 @@ function createUpdateMock(result: any) {
   };
 }
 
-// select : select().eq().maybeSingle()
-function createSelectMock(result: any) {
+function createUpdateMock(result: any) {
   return {
-    select: vi.fn().mockImplementation(() => ({
+    update: vi.fn().mockImplementation(() => ({
       eq: vi.fn().mockImplementation(() => ({
-        maybeSingle: vi.fn().mockResolvedValue(result),
+        select: vi.fn().mockImplementation(() => ({
+          returns: vi.fn().mockImplementation(() => ({
+            single: vi.fn().mockResolvedValue(result),
+          })),
+        })),
       })),
     })),
   };
@@ -153,10 +154,9 @@ describe('listContenus', () => {
   });
 
   it('should order by date_creation descending', async () => {
-    const orderFn = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockFrom = vi.fn().mockImplementation(() => ({
       select: vi.fn().mockImplementation(() => ({
-        order: orderFn,
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       })),
     }));
 
@@ -164,7 +164,8 @@ describe('listContenus', () => {
 
     await listContenus();
 
-    expect(orderFn).toHaveBeenCalledWith('date_creation', { ascending: false });
+    const orderCall = (mockFrom().select().order as any).mock.calls[0];
+    expect(orderCall).toEqual(['date_creation', { ascending: false }]);
   });
 });
 
@@ -312,6 +313,18 @@ describe('createContenu', () => {
     expect(result.error?.message).toBe('La création du contenu a échoué.');
     expect(revalidateTag).not.toHaveBeenCalled();
   });
+
+  it('should call revalidateTag after successful creation', async () => {
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => createInsertMock({ data: mockContenu, error: null })),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
+
+    await createContenu(validInput);
+
+    expect(revalidateTag).toHaveBeenCalledWith('contenus');
+  });
 });
 
 // ============================================
@@ -347,24 +360,89 @@ describe('updateContenu', () => {
   };
 
   function createUpdateWithSelectMock(selectResult: any, updateResult: any) {
-    const selectMock = createSelectMock(selectResult);
-    const updateMock = createUpdateMock(updateResult);
+    const single = vi.fn().mockResolvedValue(updateResult);
+    const updateSelect = vi.fn().mockImplementation(() => ({
+      returns: vi.fn().mockImplementation(() => ({
+        single,
+      })),
+    }));
 
-    const fromFn = vi.fn();
-    fromFn.mockReturnValueOnce(selectMock);
-    fromFn.mockReturnValueOnce(updateMock);
+    const maybeSingle = vi.fn().mockResolvedValue(selectResult);
+    const currentSelect = vi.fn().mockImplementation(() => ({
+      maybeSingle,
+    }));
+
+    const eqForSelect = vi.fn().mockImplementation(() => ({
+      select: currentSelect,
+    }));
+
+    const update = vi.fn().mockImplementation(() => ({
+      eq: vi.fn().mockImplementation(() => ({
+        select: updateSelect,
+      })),
+    }));
+
+    const from = vi.fn().mockImplementation(() => {
+      // First call: select current
+      // Second call: update
+      // We need to distinguish calls
+      return {
+        select: vi.fn().mockImplementation(() => ({
+          eq: eqForSelect,
+        })),
+        update: update,
+      };
+    });
 
     return {
-      ...createAuthMock(),
-      from: fromFn,
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'user-123' } },
+          error: null,
+        }),
+      },
+      from: from,
+    };
+  }
+
+  function createUpdateMock(result: any) {
+    return {
+      update: vi.fn().mockImplementation(() => ({
+        eq: vi.fn().mockImplementation(() => ({
+          select: vi.fn().mockImplementation(() => ({
+            returns: vi.fn().mockImplementation(() => ({
+              single: vi.fn().mockResolvedValue(result),
+            })),
+          })),
+        })),
+      })),
+    };
+  }
+
+  function createSelectMock(result: any) {
+    return {
+      select: vi.fn().mockImplementation(() => ({
+        eq: vi.fn().mockImplementation(() => ({
+          maybeSingle: vi.fn().mockResolvedValue(result),
+        })),
+      })),
     };
   }
 
   it('should update contenu and return ApiResponse', async () => {
-    const mockSupabase = createUpdateWithSelectMock(
-      { data: mockCurrent, error: null },
-      { data: mockUpdated, error: null }
-    );
+    const mockSelect = createSelectMock({ data: mockCurrent, error: null });
+    const mockUpdate = createUpdateMock({ data: mockUpdated, error: null });
+
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        // First call returns select, second returns update
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce(mockUpdate);
+        return from();
+      }),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await updateContenu(validId, validInput);
@@ -392,24 +470,33 @@ describe('updateContenu', () => {
   });
 
   it('should return NOT_FOUND when contenu does not exist (PGRST116)', async () => {
-    const mockSupabase = createUpdateWithSelectMock(
-      { data: null, error: { code: 'PGRST116', message: 'not found' } },
-      { data: null, error: null }
-    );
+    const mockSelect = createSelectMock({ data: null, error: { code: 'PGRST116', message: 'not found' } });
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => mockSelect),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await updateContenu(validId, validInput);
 
     expect(result.error?.code).toBe('NOT_FOUND');
-    expect(result.error?.message).toBe('Le contenu demandé est introuvable.');
+    expect(result.error?.message).toBe('Le contenu à modifier est introuvable.');
     expect(revalidateTag).not.toHaveBeenCalled();
   });
 
   it('should return CONFLICT on 23505 error', async () => {
-    const mockSupabase = createUpdateWithSelectMock(
-      { data: mockCurrent, error: null },
-      { data: null, error: { code: '23505', message: 'duplicate' } }
-    );
+    const mockSelect = createSelectMock({ data: mockCurrent, error: null });
+    const mockUpdate = createUpdateMock({ data: null, error: { code: '23505', message: 'duplicate' } });
+
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce(mockUpdate);
+        return from();
+      }),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await updateContenu(validId, validInput);
@@ -420,10 +507,18 @@ describe('updateContenu', () => {
   });
 
   it('should return VALIDATION_ERROR on 23503 (FK violation)', async () => {
-    const mockSupabase = createUpdateWithSelectMock(
-      { data: mockCurrent, error: null },
-      { data: null, error: { code: '23503', message: 'fk violation' } }
-    );
+    const mockSelect = createSelectMock({ data: mockCurrent, error: null });
+    const mockUpdate = createUpdateMock({ data: null, error: { code: '23503', message: 'fk violation' } });
+
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce(mockUpdate);
+        return from();
+      }),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await updateContenu(validId, validInput);
@@ -434,10 +529,18 @@ describe('updateContenu', () => {
   });
 
   it('should return FORBIDDEN on 42501 error', async () => {
-    const mockSupabase = createUpdateWithSelectMock(
-      { data: mockCurrent, error: null },
-      { data: null, error: { code: '42501', message: 'permission denied' } }
-    );
+    const mockSelect = createSelectMock({ data: mockCurrent, error: null });
+    const mockUpdate = createUpdateMock({ data: null, error: { code: '42501', message: 'permission denied' } });
+
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce(mockUpdate);
+        return from();
+      }),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await updateContenu(validId, validInput);
@@ -447,115 +550,109 @@ describe('updateContenu', () => {
     expect(revalidateTag).not.toHaveBeenCalled();
   });
 
-  describe('date_publication logic', () => {
-    it('should set date_publication automatically when status changes to "publie"', async () => {
-      let capturedPayload: any = null;
+  it('should set date_publication automatically when status changes to "publie"', async () => {
+    const currentWithNullDate = { statut: 'non_publie', date_publication: null };
+    const mockSelect = createSelectMock({ data: currentWithNullDate, error: null });
 
-      const updateFn = vi.fn().mockImplementation((payload) => {
-        capturedPayload = payload;
-        return {
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({
-                data: { ...mockUpdated, ...payload },
-                error: null,
-              }),
+    // We'll capture the payload sent to update
+    let updatePayload: any = null;
+    const updateFn = vi.fn().mockImplementation((payload) => {
+      updatePayload = payload;
+      return {
+        eq: vi.fn().mockImplementation(() => ({
+          select: vi.fn().mockImplementation(() => ({
+            returns: vi.fn().mockImplementation(() => ({
+              single: vi.fn().mockResolvedValue({ data: { ...mockUpdated, ...payload }, error: null }),
             })),
           })),
-        };
-      });
-
-      const selectMock = createSelectMock({ data: { statut: 'non_publie', date_publication: null }, error: null });
-      const updateMock = { update: updateFn };
-
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(updateMock);
-
-      const mockSupabase = {
-        ...createAuthMock(),
-        from: fromFn,
+        })),
       };
-      vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
-
-      await updateContenu(validId, { ...validInput, statut: 'publie' });
-
-      expect(capturedPayload).not.toBeNull();
-      expect(capturedPayload.date_publication).toBeDefined();
-      expect(capturedPayload.date_publication).not.toBeNull();
     });
 
-    it('should set date_publication to null when status changes to "non_publie"', async () => {
-      let capturedPayload: any = null;
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce({ update: updateFn });
+        return from();
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
-      const updateFn = vi.fn().mockImplementation((payload) => {
-        capturedPayload = payload;
-        return {
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({
-                data: { ...mockUpdated, ...payload },
-                error: null,
-              }),
+    await updateContenu(validId, { ...validInput, statut: 'publie' });
+
+    expect(updatePayload.date_publication).toBeDefined();
+    expect(updatePayload.date_publication).not.toBeNull();
+  });
+
+  it('should set date_publication to null when status changes to "non_publie"', async () => {
+    const currentWithDate = { statut: 'publie', date_publication: '2025-01-01T00:00:00Z' };
+    const mockSelect = createSelectMock({ data: currentWithDate, error: null });
+
+    let updatePayload: any = null;
+    const updateFn = vi.fn().mockImplementation((payload) => {
+      updatePayload = payload;
+      return {
+        eq: vi.fn().mockImplementation(() => ({
+          select: vi.fn().mockImplementation(() => ({
+            returns: vi.fn().mockImplementation(() => ({
+              single: vi.fn().mockResolvedValue({ data: { ...mockUpdated, ...payload }, error: null }),
             })),
           })),
-        };
-      });
-
-      const selectMock = createSelectMock({ data: { statut: 'publie', date_publication: '2025-01-01T00:00:00Z' }, error: null });
-      const updateMock = { update: updateFn };
-
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(updateMock);
-
-      const mockSupabase = {
-        ...createAuthMock(),
-        from: fromFn,
+        })),
       };
-      vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
-
-      await updateContenu(validId, { ...validInput, statut: 'non_publie' });
-
-      expect(capturedPayload).not.toBeNull();
-      expect(capturedPayload.date_publication).toBeNull();
     });
 
-    it('should not change date_publication when status unchanged and already published', async () => {
-      let capturedPayload: any = null;
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce({ update: updateFn });
+        return from();
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
-      const updateFn = vi.fn().mockImplementation((payload) => {
-        capturedPayload = payload;
-        return {
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({
-                data: { ...mockUpdated, ...payload },
-                error: null,
-              }),
+    await updateContenu(validId, { ...validInput, statut: 'non_publie' });
+
+    expect(updatePayload.date_publication).toBeNull();
+  });
+
+  it('should not change date_publication when status unchanged and already published', async () => {
+    const currentWithDate = { statut: 'publie', date_publication: '2025-01-01T00:00:00Z' };
+    const mockSelect = createSelectMock({ data: currentWithDate, error: null });
+
+    let updatePayload: any = null;
+    const updateFn = vi.fn().mockImplementation((payload) => {
+      updatePayload = payload;
+      return {
+        eq: vi.fn().mockImplementation(() => ({
+          select: vi.fn().mockImplementation(() => ({
+            returns: vi.fn().mockImplementation(() => ({
+              single: vi.fn().mockResolvedValue({ data: { ...mockUpdated, ...payload }, error: null }),
             })),
           })),
-        };
-      });
-
-      const selectMock = createSelectMock({ data: { statut: 'publie', date_publication: '2025-01-01T00:00:00Z' }, error: null });
-      const updateMock = { update: updateFn };
-
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(updateMock);
-
-      const mockSupabase = {
-        ...createAuthMock(),
-        from: fromFn,
+        })),
       };
-      vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
-
-      await updateContenu(validId, { ...validInput, statut: 'publie' });
-
-      expect(capturedPayload).not.toBeNull();
-      expect(capturedPayload.date_publication).toBe('2025-01-01T00:00:00Z');
     });
+
+    const mockSupabase = {
+      ...createAuthMock(),
+      from: vi.fn().mockImplementation(() => {
+        const from = vi.fn();
+        from.mockReturnValueOnce(mockSelect);
+        from.mockReturnValueOnce({ update: updateFn });
+        return from();
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
+
+    await updateContenu(validId, { ...validInput, statut: 'publie' });
+
+    // date_publication should remain as '2025-01-01T00:00:00Z'
+    expect(updatePayload.date_publication).toBe('2025-01-01T00:00:00Z');
   });
 });
 

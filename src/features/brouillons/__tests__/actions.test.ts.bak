@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase/server', () => ({
 import { createClient } from '@/lib/supabase/server';
 
 // ============================================
-// HELPERS DE MOCK — CORRIGÉS
+// HELPERS DE MOCK
 // ============================================
 
 function createSelectMock(result: any) {
@@ -17,6 +17,28 @@ function createSelectMock(result: any) {
     select: vi.fn().mockImplementation(() => ({
       eq: vi.fn().mockImplementation(() => ({
         maybeSingle: vi.fn().mockResolvedValue(result),
+      })),
+    })),
+  };
+}
+
+function createSelectAllMock(result: any) {
+  return {
+    select: vi.fn().mockImplementation(() => ({
+      eq: vi.fn().mockImplementation(() => ({
+        maybeSingle: vi.fn().mockResolvedValue(result),
+      })),
+    })),
+  };
+}
+
+function createUpdateMock(result: any) {
+  return {
+    update: vi.fn().mockImplementation(() => ({
+      eq: vi.fn().mockImplementation(() => ({
+        select: vi.fn().mockImplementation(() => ({
+          single: vi.fn().mockResolvedValue(result),
+        })),
       })),
     })),
   };
@@ -32,15 +54,14 @@ function createInsertMock(result: any) {
   };
 }
 
-function createUpdateMock(result: any) {
+function createAuthMock() {
   return {
-    update: vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue(result),
-        })),
-      })),
-    })),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null,
+      }),
+    },
   };
 }
 
@@ -82,6 +103,9 @@ describe('saveBrouillon', () => {
     });
 
     it('should return VALIDATION_ERROR when input is invalid', async () => {
+      // contenu_id is optional, so valid
+      const validInput = { titre: 'Test' };
+      // But we can test with invalid rubrique_id
       const invalidInput = { rubrique_id: 'not-a-uuid' };
 
       const result = await saveBrouillon(invalidInput);
@@ -114,14 +138,19 @@ describe('saveBrouillon', () => {
         texte: 'Contenu du brouillon',
       };
 
-      const selectMock = createSelectMock({ data: null, error: null });
-      const insertMock = createInsertMock({ data: mockBrouillon, error: null });
+      // No existing brouillon found
+      const mockSelect = createSelectMock({ data: null, error: null });
 
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(insertMock);
+      const mockInsert = createInsertMock({ data: mockBrouillon, error: null });
 
-      const mockSupabase = { from: fromFn };
+      const mockSupabase = {
+        from: vi.fn().mockImplementation(() => {
+          const from = vi.fn();
+          from.mockReturnValueOnce(mockSelect);
+          from.mockReturnValueOnce(mockInsert);
+          return from();
+        }),
+      };
       vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
       const result = await saveBrouillon(input);
@@ -135,8 +164,11 @@ describe('saveBrouillon', () => {
         titre: 'Test',
       };
 
-      const selectMock = createSelectMock({ data: null, error: { message: 'DB error' } });
-      const mockSupabase = { from: vi.fn().mockReturnValue(selectMock) };
+      const mockSelect = createSelectMock({ data: null, error: { message: 'DB error' } });
+
+      const mockSupabase = {
+        from: vi.fn().mockImplementation(() => mockSelect),
+      };
       vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
       const result = await saveBrouillon(input);
@@ -166,14 +198,17 @@ describe('saveBrouillon', () => {
         date_derniere_sauvegarde: '2025-01-01T00:00:00Z',
       };
 
-      const selectMock = createSelectMock({ data: existingBrouillon, error: null });
-      const updateMock = createUpdateMock({ data: updatedBrouillon, error: null });
+      const mockSelect = createSelectMock({ data: existingBrouillon, error: null });
+      const mockUpdate = createUpdateMock({ data: updatedBrouillon, error: null });
 
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(updateMock);
-
-      const mockSupabase = { from: fromFn };
+      const mockSupabase = {
+        from: vi.fn().mockImplementation(() => {
+          const from = vi.fn();
+          from.mockReturnValueOnce(mockSelect);
+          from.mockReturnValueOnce(mockUpdate);
+          return from();
+        }),
+      };
       vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
       const result = await saveBrouillon(input);
@@ -188,14 +223,17 @@ describe('saveBrouillon', () => {
       };
 
       const existingBrouillon = { id: 'existing-id', contenu_id: input.contenu_id };
-      const selectMock = createSelectMock({ data: existingBrouillon, error: null });
-      const updateMock = createUpdateMock({ data: null, error: { message: 'DB error' } });
+      const mockSelect = createSelectMock({ data: existingBrouillon, error: null });
+      const mockUpdate = createUpdateMock({ data: null, error: { message: 'DB error' } });
 
-      const fromFn = vi.fn();
-      fromFn.mockReturnValueOnce(selectMock);
-      fromFn.mockReturnValueOnce(updateMock);
-
-      const mockSupabase = { from: fromFn };
+      const mockSupabase = {
+        from: vi.fn().mockImplementation(() => {
+          const from = vi.fn();
+          from.mockReturnValueOnce(mockSelect);
+          from.mockReturnValueOnce(mockUpdate);
+          return from();
+        }),
+      };
       vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
       const result = await saveBrouillon(input);
@@ -282,8 +320,10 @@ describe('getBrouillon', () => {
   };
 
   it('should return brouillon when found', async () => {
-    const mockSelect = createSelectMock({ data: mockBrouillon, error: null });
-    const mockSupabase = { from: vi.fn().mockReturnValue(mockSelect) };
+    const mockSelect = createSelectAllMock({ data: mockBrouillon, error: null });
+    const mockSupabase = {
+      from: vi.fn().mockImplementation(() => mockSelect),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await getBrouillon(contenuId);
@@ -292,8 +332,10 @@ describe('getBrouillon', () => {
   });
 
   it('should return { data: null } when no brouillon found', async () => {
-    const mockSelect = createSelectMock({ data: null, error: null });
-    const mockSupabase = { from: vi.fn().mockReturnValue(mockSelect) };
+    const mockSelect = createSelectAllMock({ data: null, error: null });
+    const mockSupabase = {
+      from: vi.fn().mockImplementation(() => mockSelect),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await getBrouillon(contenuId);
@@ -302,8 +344,10 @@ describe('getBrouillon', () => {
   });
 
   it('should return INTERNAL_ERROR on Supabase error', async () => {
-    const mockSelect = createSelectMock({ data: null, error: { message: 'DB error' } });
-    const mockSupabase = { from: vi.fn().mockReturnValue(mockSelect) };
+    const mockSelect = createSelectAllMock({ data: null, error: { message: 'DB error' } });
+    const mockSupabase = {
+      from: vi.fn().mockImplementation(() => mockSelect),
+    };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
     const result = await getBrouillon(contenuId);
