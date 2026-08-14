@@ -39,11 +39,29 @@ describe('listUtilisateurs', () => {
     expect(mockSupabase.from().select().order).toHaveBeenCalledWith('date_creation', { ascending: false });
   });
 
-  it('should_retourner_INTERNAL_ERROR_si_Supabase_echoue', async () => {
+  it('should_retourner_NOT_FOUND_si_PGRST116_est_retourne_par_Supabase', async () => {
+    // PGRST116 est mappé vers NOT_FOUND par mapSupabaseError
     const mockSupabase = {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          order: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'DB error' } }),
+          order: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
+        }),
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
+
+    const result = await listUtilisateurs();
+
+    expect(result.data).toBeUndefined();
+    expect(result.error?.code).toBe('NOT_FOUND');
+    expect(result.error?.message).toBe('Utilisateur introuvable.');
+  });
+
+  it('should_retourner_INTERNAL_ERROR_si_erreur_inconnue', async () => {
+    const mockSupabase = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          order: vi.fn().mockResolvedValue({ data: null, error: { code: 'UNKNOWN', message: 'Unknown error' } }),
         }),
       }),
     };
@@ -53,6 +71,7 @@ describe('listUtilisateurs', () => {
 
     expect(result.data).toBeUndefined();
     expect(result.error?.code).toBe('INTERNAL_ERROR');
+    expect(result.error?.message).toBe('Une erreur inattendue est survenue. Veuillez réessayer.');
   });
 
   it('should_retourner_une_liste_vide_si_aucun_utilisateur', async () => {
@@ -159,14 +178,35 @@ describe('createUtilisateur', () => {
     });
   });
 
-  it('should_retourner_INTERNAL_ERROR_si_Supabase_echoue_autre_erreur', async () => {
+  it('should_retourner_NOT_FOUND_si_PGRST116_est_retourne_par_Supabase', async () => {
     const mockUser = { id: 'auth-123' };
     const mockSupabase = {
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
       from: vi.fn().mockReturnValue({
         insert: vi.fn().mockImplementation(() => ({
           select: vi.fn().mockImplementation(() => ({
-            single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Unknown' } }),
+            single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
+          })),
+        })),
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
+
+    const result = await createUtilisateur(validInput);
+
+    expect(result.data).toBeUndefined();
+    expect(result.error?.code).toBe('NOT_FOUND');
+    expect(result.error?.message).toBe('Utilisateur introuvable.');
+  });
+
+  it('should_retourner_INTERNAL_ERROR_si_erreur_inconnue', async () => {
+    const mockUser = { id: 'auth-123' };
+    const mockSupabase = {
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
+      from: vi.fn().mockReturnValue({
+        insert: vi.fn().mockImplementation(() => ({
+          select: vi.fn().mockImplementation(() => ({
+            single: vi.fn().mockResolvedValue({ data: null, error: { code: 'UNKNOWN', message: 'Unknown' } }),
           })),
         })),
       }),
@@ -177,6 +217,7 @@ describe('createUtilisateur', () => {
 
     expect(result.data).toBeUndefined();
     expect(result.error?.code).toBe('INTERNAL_ERROR');
+    expect(result.error?.message).toBe('Une erreur inattendue est survenue. Veuillez réessayer.');
   });
 });
 
@@ -191,16 +232,22 @@ describe('updateUtilisateur', () => {
   it('should_mettre_a_jour_le_role_avec_donnees_valides', async () => {
     const mockUser = { id: 'auth-123' };
     const mockData = { id: userId, email: 'test@test.com', role: 'lecture_seule', statut: 'actif', date_creation: '', date_modification: expect.any(String) };
+
+    // Structure de mock correcte pour update().eq().select().single()
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+      })),
+    }));
+
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
+    }));
+
     const mockSupabase = {
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockImplementation(() => ({
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-            })),
-          })),
-        })),
+        update: mockUpdate,
       }),
     };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
@@ -211,11 +258,11 @@ describe('updateUtilisateur', () => {
     expect(result.error).toBeUndefined();
     expect(mockSupabase.auth.getUser).toHaveBeenCalled();
     expect(mockSupabase.from).toHaveBeenCalledWith('utilisateur');
-    expect(mockSupabase.from().update).toHaveBeenCalledWith({
+    expect(mockUpdate).toHaveBeenCalledWith({
       role: validInput.role,
       date_modification: expect.any(String),
     });
-    expect(mockSupabase.from().update().eq).toHaveBeenCalledWith('id', userId);
+    expect(mockEq).toHaveBeenCalledWith('id', userId);
   });
 
   it('should_retourner_VALIDATION_ERROR_si_id_manquant', async () => {
@@ -267,16 +314,18 @@ describe('updateUtilisateur', () => {
 
   it('should_retourner_NOT_FOUND_si_utilisateur_introuvable_PGRST116', async () => {
     const mockUser = { id: 'auth-123' };
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
+      })),
+    }));
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
+    }));
     const mockSupabase = {
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockImplementation(() => ({
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
-            })),
-          })),
-        })),
+        update: mockUpdate,
       }),
     };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
@@ -298,23 +347,22 @@ describe('desactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
     vi.clearAllMocks();
   });
 
-  // ✅ TEST CRITIQUE — Preuve du soft-delete
   it('should_desactiver_un_utilisateur_avec_update_statut_desactive_et_JAMAIS_delete', async () => {
     const mockUser = { id: 'auth-123' };
     const mockData = { id: userId, email: 'test@test.com', role: 'total', statut: 'desactive', date_creation: '', date_modification: expect.any(String) };
 
-    // Exposer À LA FOIS update() ET delete() sur le mock from()
-    const mockUpdate = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-        })),
+    // Structure de mock correcte pour update().eq().select().single()
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
       })),
     }));
 
-    const mockDelete = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    });
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
+    }));
+
+    const mockDelete = vi.fn();
 
     const mockFrom = vi.fn().mockReturnValue({
       update: mockUpdate,
@@ -338,7 +386,7 @@ describe('desactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
       statut: 'desactive',
       date_modification: expect.any(String),
     });
-    expect(mockUpdate().eq).toHaveBeenCalledWith('id', userId);
+    expect(mockEq).toHaveBeenCalledWith('id', userId);
 
     // [D11] SOFT-DELETE UNIQUEMENT : delete() JAMAIS appelé
     expect(mockDelete).not.toHaveBeenCalled();
@@ -372,17 +420,18 @@ describe('desactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
 
   it('should_retourner_NOT_FOUND_si_utilisateur_introuvable_PGRST116', async () => {
     const mockUser = { id: 'auth-123' };
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
+      })),
+    }));
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
+    }));
     const mockSupabase = {
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockImplementation(() => ({
-          eq: vi.fn().mockImplementation(() => ({
-            select: vi.fn().mockImplementation(() => ({
-              single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Row not found' } }),
-            })),
-          })),
-        })),
-        delete: vi.fn(),
+        update: mockUpdate,
       }),
     };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
@@ -408,17 +457,17 @@ describe('reactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
     const mockUser = { id: 'auth-123' };
     const mockData = { id: userId, email: 'test@test.com', role: 'total', statut: 'actif', date_creation: '', date_modification: expect.any(String) };
 
-    const mockUpdate = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
-        })),
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: mockData, error: null }),
       })),
     }));
 
-    const mockDelete = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    });
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
+    }));
+
+    const mockDelete = vi.fn();
 
     const mockFrom = vi.fn().mockReturnValue({
       update: mockUpdate,
@@ -442,7 +491,7 @@ describe('reactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
       statut: 'actif',
       date_modification: expect.any(String),
     });
-    expect(mockUpdate().eq).toHaveBeenCalledWith('id', userId);
+    expect(mockEq).toHaveBeenCalledWith('id', userId);
 
     // [D11] SOFT-DELETE UNIQUEMENT : delete() JAMAIS appelé
     expect(mockDelete).not.toHaveBeenCalled();
@@ -477,20 +526,19 @@ describe('reactiverUtilisateur — SOFT-DELETE CRITIQUE [D11]', () => {
 
 describe('SOFT-DELETE EXCLUSIF — [D11] — PREUVE D_ABSENCE_DE_DELETE', () => {
   it('should_PROUVER_qu_aucun_deleteUtilisateur_n_est_exporte', async () => {
-    // Vérifie qu'aucune fonction deleteUtilisateur n'est exportée
-    // Si elle existe, c'est une violation de D11
     const actions = await import('../actions');
     expect(actions).not.toHaveProperty('deleteUtilisateur');
   });
 
   it('should_PROUVER_que_desactiverUtilisateur_et_reactiverUtilisateur_utilisent_update_pas_delete', async () => {
     const mockUser = { id: 'auth-123' };
-    const mockUpdate = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({ data: { id: '1', statut: 'desactive' }, error: null }),
-        })),
+    const mockEq = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: { id: '1', statut: 'desactive' }, error: null }),
       })),
+    }));
+    const mockUpdate = vi.fn().mockImplementation(() => ({
+      eq: mockEq,
     }));
     const mockDelete = vi.fn();
     const mockFrom = vi.fn().mockReturnValue({ update: mockUpdate, delete: mockDelete });
@@ -503,18 +551,18 @@ describe('SOFT-DELETE EXCLUSIF — [D11] — PREUVE D_ABSENCE_DE_DELETE', () => 
 
     await desactiverUtilisateur('123');
 
-    // Preuve : update() appelé, delete() JAMAIS
     expect(mockUpdate).toHaveBeenCalled();
     expect(mockDelete).not.toHaveBeenCalled();
 
     // Second appel : réactivation
     vi.clearAllMocks();
-    const mockUpdate2 = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({ data: { id: '1', statut: 'actif' }, error: null }),
-        })),
+    const mockEq2 = vi.fn().mockImplementation(() => ({
+      select: vi.fn().mockImplementation(() => ({
+        single: vi.fn().mockResolvedValue({ data: { id: '1', statut: 'actif' }, error: null }),
       })),
+    }));
+    const mockUpdate2 = vi.fn().mockImplementation(() => ({
+      eq: mockEq2,
     }));
     const mockDelete2 = vi.fn();
     const mockFrom2 = vi.fn().mockReturnValue({ update: mockUpdate2, delete: mockDelete2 });
