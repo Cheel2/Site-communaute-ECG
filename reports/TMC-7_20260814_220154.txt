@@ -1,0 +1,93 @@
+========================================
+RAPPORT TMC-7 — PARAMÈTRES SEO/WA
+Date : Fri Aug 14 22:01:54 UTC 2026
+Commit : 3492903
+========================================
+
+>>> Exécution : npx vitest run src/features/parametres/__tests__/ --reporter=verbose
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90m/workspaces/Site-communaute-ECG[39m
+
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetWhatsappConfig[2m > [22mshould_retourner_la_config_whatsapp_avec_numero_et_message_defaut[32m 4[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetWhatsappConfig[2m > [22mshould_retourner_valeurs_vides_si_cles_manquantes[32m 1[2mms[22m[39m
+ [31m×[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetWhatsappConfig[2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue[32m 7[2mms[22m[39m
+[31m   → expected 'NOT_FOUND' to be 'INTERNAL_ERROR' // Object.is equality[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetWhatsappConfig[2m > [22mshould_retourner_NOT_FOUND_si_PGRST116[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupdateWhatsappConfig[2m > [22mshould_upsert_la_config_whatsapp_avec_onConflict_cle[32m 3[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupdateWhatsappConfig[2m > [22mshould_retourner_VALIDATION_ERROR_si_Zod_echoue[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupdateWhatsappConfig[2m > [22mshould_retourner_UNAUTHORIZED_si_aucun_utilisateur_authentifie[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupdateWhatsappConfig[2m > [22mshould_proouver_l_idempotence_avec_onConflict_cle[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetAllSeo[2m > [22mshould_retourner_la_liste_des_pages_seo_triees_par_chemin[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetAllSeo[2m > [22mshould_retourner_une_liste_vide_si_aucune_page_seo[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetAllSeo[2m > [22mshould_retourner_NOT_FOUND_si_PGRST116[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_upsert_une_page_seo_avec_onConflict_chemin[32m 2[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_normaliser_chemin_avec_slash_initial_en_le_conservant[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_normaliser_chemin_sans_slash_initial_en_ajoutant_le_slash[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_normaliser_chemin_avec_slash_final_en_retirant_le_slash[32m 1[2mms[22m[39m
+ [31m×[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_normaliser_chemin_vide_en_slash_seul[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of null (reading 'chemin')[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_retourner_VALIDATION_ERROR_si_Zod_echoue[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_retourner_UNAUTHORIZED_si_aucun_utilisateur_authentifie[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_proouver_l_idempotence_avec_onConflict_chemin[32m 1[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_numero_whatsapp_avec_plus_international[32m 3[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_numero_whatsapp_sans_plus[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_numero_whatsapp_avec_message_defaut_optionnel[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_message_defaut_vide[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_vide[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_trop_court_6_chiffres[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_trop_long_16_chiffres[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_avec_lettres[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_commencant_par_0[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_avec_espaces[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateWhatsappSchema[2m > [22mcas limites — numéro WhatsApp[2m > [22mshould_rejeter_numero_avec_tirets[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_chemin_avec_slash_initial[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_chemin_complet_avec_tous_les_champs[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_chemin_sans_slash_initial_et_le_normaliser_dans_laction[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas nominaux[2m > [22mshould_accepter_titre_meta_description_mots_cles_optionnels[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas limites[2m > [22mshould_rejeter_chemin_vide[32m 0[2mms[22m[39m
+ [32m✓[39m src/features/parametres/__tests__/schemas.test.ts[2m > [22mupdateSeoSchema[2m > [22mcas limites[2m > [22mshould_rejeter_chemin_avec_uniquement_espaces[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/features/parametres/__tests__/actions.test.ts[2m > [22mgetWhatsappConfig[2m > [22mshould_retourner_INTERNAL_ERROR_si_Supabase_echoue
+[31m[1mAssertionError[22m: expected 'NOT_FOUND' to be 'INTERNAL_ERROR' // Object.is equality[39m
+
+Expected: [32m"INTERNAL_ERROR"[39m
+Received: [31m"NOT_FOUND"[39m
+
+[36m [2m❯[22m src/features/parametres/__tests__/actions.test.ts:[2m75:32[22m[39m
+    [90m 73|[39m
+    [90m 74|[39m     [34mexpect[39m(result[33m.[39mdata)[33m.[39m[34mtoBeUndefined[39m()[33m;[39m
+    [90m 75|[39m     [34mexpect[39m(result[33m.[39merror[33m?.[39mcode)[33m.[39m[34mtoBe[39m([32m'INTERNAL_ERROR'[39m)[33m;[39m
+    [90m   |[39m                                [31m^[39m
+    [90m 76|[39m   })[33m;[39m
+    [90m 77|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/features/parametres/__tests__/actions.test.ts[2m > [22mupsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA][2m > [22mshould_normaliser_chemin_vide_en_slash_seul
+[31m[1mTypeError[22m: Cannot read properties of null (reading 'chemin')[39m
+[36m [2m❯[22m src/features/parametres/__tests__/actions.test.ts:[2m384:28[22m[39m
+    [90m382|[39m     [35mawait[39m [34mupsertSeo[39m({ chemin[33m:[39m [32m''[39m })[33m;[39m
+    [90m383|[39m
+    [90m384|[39m     [34mexpect[39m(capturedPayload[33m.[39mchemin)[33m.[39m[34mtoBe[39m([32m'/'[39m)[33m;[39m
+    [90m   |[39m                            [31m^[39m
+    [90m385|[39m   })[33m;[39m
+    [90m386|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m34 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 22:01:55
+[2m   Duration [22m 516ms[2m (transform 117ms, setup 24ms, import 151ms, tests 38ms, environment 0ms)[22m
+
+
+========================================
+FIN DU RAPPORT TMC-7
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-7_20260814_220154.txt
+========================================

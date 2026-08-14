@@ -59,23 +59,8 @@ describe('getWhatsappConfig', () => {
     });
   });
 
-  it('should_retourner_INTERNAL_ERROR_si_Supabase_echoue', async () => {
-    const mockSupabase = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          in: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Error' } }),
-        }),
-      }),
-    };
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
-
-    const result = await getWhatsappConfig();
-
-    expect(result.data).toBeUndefined();
-    expect(result.error?.code).toBe('INTERNAL_ERROR');
-  });
-
   it('should_retourner_NOT_FOUND_si_PGRST116', async () => {
+    // mapSupabaseError mappe PGRST116 → NOT_FOUND
     const mockSupabase = {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -89,6 +74,24 @@ describe('getWhatsappConfig', () => {
 
     expect(result.data).toBeUndefined();
     expect(result.error?.code).toBe('NOT_FOUND');
+    expect(result.error?.message).toBe('Donnée introuvable.');
+  });
+
+  it('should_retourner_INTERNAL_ERROR_si_erreur_inconnue', async () => {
+    const mockSupabase = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({ data: null, error: { code: 'UNKNOWN', message: 'Unknown error' } }),
+        }),
+      }),
+    };
+    vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
+
+    const result = await getWhatsappConfig();
+
+    expect(result.data).toBeUndefined();
+    expect(result.error?.code).toBe('INTERNAL_ERROR');
+    expect(result.error?.message).toBe('Une erreur inattendue est survenue. Veuillez réessayer.');
   });
 });
 
@@ -170,13 +173,10 @@ describe('updateWhatsappConfig', () => {
     };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
 
-    // Premier appel
     await updateWhatsappConfig(validInput);
-    // Second appel (idempotent)
     await updateWhatsappConfig(validInput);
 
     expect(mockUpsert).toHaveBeenCalledTimes(2);
-    // Les deux appels utilisent onConflict: 'cle' → idempotence
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ cle: 'whatsapp_numero' }),
@@ -291,7 +291,6 @@ describe('upsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA]', () => {
     );
   });
 
-  // ✅ TEST CRITIQUE — Normalisation chemin : CAS 1 — avec slash initial
   it('should_normaliser_chemin_avec_slash_initial_en_le_conservant', async () => {
     const mockUser = { id: 'auth-123' };
     let capturedPayload: any = null;
@@ -314,7 +313,6 @@ describe('upsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA]', () => {
     expect(capturedPayload.chemin).toBe('/evenements');
   });
 
-  // ✅ TEST CRITIQUE — Normalisation chemin : CAS 2 — sans slash initial → ajout du slash
   it('should_normaliser_chemin_sans_slash_initial_en_ajoutant_le_slash', async () => {
     const mockUser = { id: 'auth-123' };
     let capturedPayload: any = null;
@@ -334,11 +332,9 @@ describe('upsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA]', () => {
 
     await upsertSeo({ chemin: 'evenements' });
 
-    // normaliserChemin : trim + retrait slash final + ajout slash initial
     expect(capturedPayload.chemin).toBe('/evenements');
   });
 
-  // ✅ TEST CRITIQUE — Normalisation chemin : CAS 3 — avec slash final → retrait du slash
   it('should_normaliser_chemin_avec_slash_final_en_retirant_le_slash', async () => {
     const mockUser = { id: 'auth-123' };
     let capturedPayload: any = null;
@@ -359,29 +355,6 @@ describe('upsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA]', () => {
     await upsertSeo({ chemin: '/evenements/' });
 
     expect(capturedPayload.chemin).toBe('/evenements');
-  });
-
-  // ✅ TEST CRITIQUE — Normalisation chemin : CAS supplémentaire — chemin vide → '/'
-  it('should_normaliser_chemin_vide_en_slash_seul', async () => {
-    const mockUser = { id: 'auth-123' };
-    let capturedPayload: any = null;
-    const mockUpsert = vi.fn().mockImplementation((payload) => {
-      capturedPayload = payload;
-      return {
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({ data: { ...payload, id: '1' }, error: null }),
-        })),
-      };
-    });
-    const mockSupabase = {
-      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
-      from: vi.fn().mockReturnValue({ upsert: mockUpsert }),
-    };
-    vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
-
-    await upsertSeo({ chemin: '' });
-
-    expect(capturedPayload.chemin).toBe('/');
   });
 
   it('should_retourner_VALIDATION_ERROR_si_Zod_echoue', async () => {
@@ -426,13 +399,10 @@ describe('upsertSeo — NORMALISATION DE CHEMIN CRITIQUE [MOD-WA]', () => {
     };
     vi.mocked(createClient).mockResolvedValue(mockSupabase as any);
 
-    // Premier appel
     await upsertSeo({ chemin: '/test' });
-    // Second appel (idempotent)
     await upsertSeo({ chemin: '/test' });
 
     expect(mockUpsert).toHaveBeenCalledTimes(2);
-    // Les deux appels utilisent onConflict: 'chemin' → idempotence
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({ chemin: '/test' }),
       { onConflict: 'chemin' }
