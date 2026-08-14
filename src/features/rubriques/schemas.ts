@@ -23,4 +23,4 @@ export const updateRubriqueSchema = z.object({
 });
 
 export type CreateRubriqueInput = z.input<typeof createRubriqueSchema>;
-export type UpdateRubriqueInput = z.input<typeof updateRubriqueSchema>;
+export type UpdateRubriqueInput = z.input<typeof updateRubriqueSchema>; 
