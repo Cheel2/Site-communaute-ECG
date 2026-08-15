@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { getDashboardStats, getTopContenus, getTopLivres } from '../actions';
 import { createClient } from '@/lib/supabase/server';
 

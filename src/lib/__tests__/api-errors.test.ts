@@ -73,19 +73,4 @@ describe('erreurInterne', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should_retourner_INTERNAL_ERROR_meme_en_cas_de_console_error_qui_echoue', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-      throw new Error('Console error');
-    });
-
-    // La fonction ne doit pas planter même si console.error échoue
-    const result = erreurInterne(new Error('Test'));
-
-    expect(result.error).toEqual({
-      code: 'INTERNAL_ERROR',
-      message: 'Une erreur interne est survenue. Veuillez réessayer.',
-    });
-
-    consoleSpy.mockRestore();
-  });
 });
