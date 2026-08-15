@@ -1,0 +1,49 @@
+========================================
+RAPPORT TMC-11 — FIXED
+Date : Sat Aug 15 16:34:18 UTC 2026
+Commit : 04d3e5f
+========================================
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90m/workspaces/Site-communaute-ECG[39m
+
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateServerClient (server.ts)[2m > [22mshould_create_server_client_with_cookies[32m 19[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateBrowserClient (client.ts)[2m > [22mshould_create_browser_client_without_cookies[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateBrowserClient (client.ts)[2m > [22mshould_return_supabase_object_with_auth_and_from_methods[32m 1[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateAnonClient (anon.ts)[2m > [22mshould_create_anon_client_as_singleton[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateAnonClient (anon.ts)[2m > [22mshould_use_persistSession_false_for_anon_client[32m 1[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mcreateAnonClient (anon.ts)[2m > [22mshould_not_use_cookies_in_anon_client[32m 1[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mContrainte D12 — Pas d ORM[2m > [22mshould_not_import_orm_in_supabase_clients[32m 1[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mMock Supabase Structure (TMC-0)[2m > [22mshould_import_mock_structure_correctly[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mMock Supabase Structure (TMC-0)[2m > [22mshould_return_mock_client_with_from_and_auth_methods[32m 4[2mms[22m[39m
+ [31m×[39m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mTypes ApiResponse et ApiError (api.ts) - Vérification de structure[2m > [22mshould_have_ApiResponse_type_contract[32m 7[2mms[22m[39m
+[31m   → expected 0 to be greater than 0[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/lib/supabase/__tests__/clients.test.ts[2m > [22mSupabase Client Integration[2m > [22mTypes ApiResponse et ApiError (api.ts) - Vérification de structure[2m > [22mshould_have_ApiResponse_type_contract
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m src/lib/supabase/__tests__/clients.test.ts:[2m169:41[22m[39m
+    [90m167|[39m
+    [90m168|[39m       [34mexpect[39m(types)[33m.[39m[34mtoBeDefined[39m()[33m;[39m
+    [90m169|[39m       [34mexpect[39m([33mObject[39m[33m.[39m[34mkeys[39m(types)[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   |[39m                                         [31m^[39m
+    [90m170|[39m
+    [90m171|[39m       const mockResponse: { data: { id: number } } = { data: { id: 1 }…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m9 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 16:34:19
+[2m   Duration [22m 310ms[2m (transform 86ms, setup 17ms, import 68ms, tests 53ms, environment 0ms)[22m
+
+
+========================================
+FIN DU RAPPORT TMC-11 — FIXED
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-11_fixed_20260815_163418.txt
+========================================
