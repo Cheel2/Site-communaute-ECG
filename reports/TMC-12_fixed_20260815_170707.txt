@@ -1,0 +1,29 @@
+========================================
+RAPPORT TMC-12 — FIXED
+Date : Sat Aug 15 17:07:07 UTC 2026
+Commit : b87a255
+========================================
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90m/workspaces/Site-communaute-ECG[39m
+
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mCas nominaux — Routes admin[2m > [22mshould_redirect_to_login_when_no_session_on_admin_route[32m 7[2mms[22m[39m
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mCas nominaux — Routes admin[2m > [22mshould_redirect_to_login_with_redirectedFrom_param[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mCas nominaux — Routes admin[2m > [22mshould_allow_admin_route_with_valid_session[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mCas nominaux — Routes admin[2m > [22mshould_not_redirect_on_admin_login_route[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mMatcher configuration[2m > [22mshould_only_match_admin_routes_via_config_matcher[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/middleware.test.ts[2m > [22mMiddleware Admin — Protection routes /admin/*[2m > [22mCas limites — Variables d environnement[2m > [22mshould_use_next_response_next_when_env_missing[32m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 17:07:08
+[2m   Duration [22m 305ms[2m (transform 57ms, setup 18ms, import 113ms, tests 15ms, environment 0ms)[22m
+
+
+========================================
+FIN DU RAPPORT TMC-12 — FIXED
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-12_fixed_20260815_170707.txt
+========================================
