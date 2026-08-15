@@ -14,7 +14,7 @@ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
 describe('Middleware Admin — Protection routes /admin/*', () => {
   let mockGetUser: ReturnType<typeof vi.fn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     // Réinitialiser les mocks pour chaque test
     const { createServerClient } = await import('@supabase/ssr');
@@ -92,35 +92,12 @@ describe('Middleware Admin — Protection routes /admin/*', () => {
     });
   });
 
-  describe('Routes publiques (non matchées)', () => {
-    it('should_not_match_public_routes', async () => {
-      // Arrange : pas de session, mais route publique
-      // Note : le matcher ["/admin/:path*"] ne capture PAS "/"
-      const request = new NextRequest('http://localhost:3000/');
-
-      // Act
-      const response = await middleware(request);
-
-      // Assert
-      // Le middleware ne devrait PAS s'exécuter pour les routes non matchées
-      // Mais comme on appelle middleware() directement, il s'exécute.
-      // On vérifie que le comportement est correct (pas de redirection)
-      // car isLoginPage est false, user est null, mais la route n'est PAS admin
-      // Le code va tenter de rediriger car !user && !isLoginPage
-      // MAIS dans la réalité, le matcher empêche l'exécution du middleware.
-      // Ce test vérifie que le middleware lui-même ne redirige pas une route publique
-      // si elle est appelée directement (cas d'erreur de matcher)
-      // ATTENTION : Ce test est un test d'intégration du comportement réel.
-      // Dans le code source, le middleware s'exécute sur TOUTES les routes
-      // si on l'appelle directement. Le matcher est une optimisation Next.js.
-      // On va donc vérifier que la logique interne redirige bien.
-      // Mais la route "/" n'est pas admin donc devrait passer.
-      // Cependant le code actuel redirige si !user && !isLoginPage.
-      // DONC ce test échouerait en l'état. On le documente comme démonstration
-      // que le matcher est nécessaire.
-      expect(response.status).toBe(307); // Le middleware redirige par défaut
-      // Ce n'est pas un bug du middleware, c'est le comportement attendu
-      // lorsque le matcher n'est pas appliqué.
+  describe('Matcher configuration', () => {
+    it('should_only_match_admin_routes_via_config_matcher', async () => {
+      // Vérification statique du matcher
+      const { config } = await import('@/middleware');
+      expect(config.matcher).toEqual(['/admin/:path*']);
+      // Ce matcher exclut automatiquement "/" et les autres routes publiques
     });
   });
 
