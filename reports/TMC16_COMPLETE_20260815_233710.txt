@@ -1,0 +1,161 @@
+========================================
+TMC-16 — TOUS LES TESTS E2E
+Date : Sat Aug 15 23:37:10 UTC 2026
+Commit : ead6406
+========================================
+
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e/visiteur-parcours.spec.ts:5:9 › TMC-16 : Parcours visiteur › Navigation publique › should_load_accueil_without_error
+  1) [chromium] › e2e/visiteur-parcours.spec.ts:5:9 › TMC-16 : Parcours visiteur › Navigation publique › should_load_accueil_without_error 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+       5 |     test('should_load_accueil_without_error', async ({ page }) => {
+       6 |       await page.goto('/');
+    >  7 |       await page.waitForLoadState('networkidle');
+         |                  ^
+       8 |       await expect(page).toHaveURL('/');
+       9 |       await expect(page.locator('main').first()).toBeVisible();
+      10 |
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:7:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-710be--load-accueil-without-error-chromium/error-context.md
+
+
+[2/12] [chromium] › e2e/visiteur-parcours.spec.ts:18:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_contenus
+  2) [chromium] › e2e/visiteur-parcours.spec.ts:18:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_contenus 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      18 |     test('should_navigate_from_accueil_to_contenus', async ({ page }) => {
+      19 |       await page.goto('/');
+    > 20 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      21 |       await page.getByRole('link', { name: 'Contenus' }).first().click();
+      22 |       await page.waitForLoadState('networkidle');
+      23 |       await expect(page).toHaveURL('/contenus');
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:20:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-f3c3a-te-from-accueil-to-contenus-chromium/error-context.md
+
+
+[3/12] [chromium] › e2e/visiteur-parcours.spec.ts:27:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_livres
+  3) [chromium] › e2e/visiteur-parcours.spec.ts:27:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_livres 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      27 |     test('should_navigate_from_accueil_to_livres', async ({ page }) => {
+      28 |       await page.goto('/');
+    > 29 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      30 |       await page.getByRole('link', { name: 'Livres' }).first().click();
+      31 |       await page.waitForLoadState('networkidle');
+      32 |       await expect(page).toHaveURL('/livres');
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:29:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-20e24-gate-from-accueil-to-livres-chromium/error-context.md
+
+
+[4/12] [chromium] › e2e/visiteur-parcours.spec.ts:36:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_evenements
+  4) [chromium] › e2e/visiteur-parcours.spec.ts:36:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_evenements 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      36 |     test('should_navigate_from_accueil_to_evenements', async ({ page }) => {
+      37 |       await page.goto('/');
+    > 38 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      39 |       await page.getByRole('link', { name: 'Événements' }).first().click();
+      40 |       await page.waitForLoadState('networkidle');
+      41 |       await expect(page).toHaveURL('/evenements');
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:38:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-47e69--from-accueil-to-evenements-chromium/error-context.md
+
+
+[5/12] [chromium] › e2e/visiteur-parcours.spec.ts:45:9 › TMC-16 : Parcours visiteur › Navigation publique › should_have_footer_with_legal_links
+  5) [chromium] › e2e/visiteur-parcours.spec.ts:45:9 › TMC-16 : Parcours visiteur › Navigation publique › should_have_footer_with_legal_links 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      45 |     test('should_have_footer_with_legal_links', async ({ page }) => {
+      46 |       await page.goto('/');
+    > 47 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      48 |       const footer = page.locator('footer');
+      49 |       await expect(footer).toBeVisible();
+      50 |       const legalLinks = footer.getByRole('link', { name: 'Mentions légales' });
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:47:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-c79ac-ave-footer-with-legal-links-chromium/error-context.md
+
+
+[6/12] [chromium] › e2e/visiteur-parcours.spec.ts:61:9 › TMC-16 : Parcours visiteur › Page contenus › should_load_contenus_without_error
+  6) [chromium] › e2e/visiteur-parcours.spec.ts:61:9 › TMC-16 : Parcours visiteur › Page contenus › should_load_contenus_without_error 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      61 |     test('should_load_contenus_without_error', async ({ page }) => {
+      62 |       await page.goto('/contenus');
+    > 63 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      64 |       await expect(page).toHaveURL('/contenus');
+      65 |       await expect(page.getByRole('heading', { name: 'Contenus' })).toBeVisible();
+      66 |     });
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:63:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-1d4a1-load-contenus-without-error-chromium/error-context.md
+
+
+[7/12] [chromium] › e2e/visiteur-parcours.spec.ts:68:9 › TMC-16 : Parcours visiteur › Page contenus › should_display_contenu_cards_or_empty_state
+  7) [chromium] › e2e/visiteur-parcours.spec.ts:68:9 › TMC-16 : Parcours visiteur › Page contenus › should_display_contenu_cards_or_empty_state 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+
+      68 |     test('should_display_contenu_cards_or_empty_state', async ({ page }) => {
+      69 |       await page.goto('/contenus');
+    > 70 |       await page.waitForLoadState('networkidle');
+         |                  ^
+      71 |       const cards = page.locator('article');
+      72 |       const emptyState = page.locator('text=Aucun contenu publié pour le moment.');
+      73 |       const cardCount = await cards.count();
+        at /workspaces/Site-communaute-ECG/e2e/visiteur-parcours.spec.ts:70:18
+
+    Error Context: playwright-report/visiteur-parcours-TMC-16-P-2d592-ontenu-cards-or-empty-state-chromium/error-context.md
+
+
+[8/12] [chromium] › e2e/visiteur-parcours.spec.ts:85:9 › TMC-16 : Parcours visiteur › Page livres › should_load_livres_without_error
+[9/12] [chromium] › e2e/visiteur-parcours.spec.ts:92:9 › TMC-16 : Parcours visiteur › Page livres › should_display_livre_cards_or_empty_state
+[10/12] [chromium] › e2e/visiteur-parcours.spec.ts:111:9 › TMC-16 : Parcours visiteur › Page événements › should_load_evenements_without_error
+[11/12] [chromium] › e2e/visiteur-parcours.spec.ts:118:9 › TMC-16 : Parcours visiteur › Page événements › should_display_evenement_cards_or_empty_state
+[12/12] [chromium] › e2e/visiteur-parcours.spec.ts:135:9 › TMC-16 : Parcours visiteur › Parcours de bout en bout › should_complete_full_visitor_journey
+  7 failed
+    [chromium] › e2e/visiteur-parcours.spec.ts:5:9 › TMC-16 : Parcours visiteur › Navigation publique › should_load_accueil_without_error 
+    [chromium] › e2e/visiteur-parcours.spec.ts:18:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_contenus 
+    [chromium] › e2e/visiteur-parcours.spec.ts:27:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_livres 
+    [chromium] › e2e/visiteur-parcours.spec.ts:36:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_evenements 
+    [chromium] › e2e/visiteur-parcours.spec.ts:45:9 › TMC-16 : Parcours visiteur › Navigation publique › should_have_footer_with_legal_links 
+    [chromium] › e2e/visiteur-parcours.spec.ts:61:9 › TMC-16 : Parcours visiteur › Page contenus › should_load_contenus_without_error 
+    [chromium] › e2e/visiteur-parcours.spec.ts:68:9 › TMC-16 : Parcours visiteur › Page contenus › should_display_contenu_cards_or_empty_state 
+  5 passed (3.8m)
+
+========================================
+FIN DES TESTS
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC16_COMPLETE_20260815_233710.txt
+========================================
