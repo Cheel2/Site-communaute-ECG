@@ -28,3 +28,6 @@ yarn-error.log*
 .env
 .env.test
 .env.test.txtreports/
+
+# Rapports de test temporaires
+reports/
