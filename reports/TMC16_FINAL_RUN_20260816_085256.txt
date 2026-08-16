@@ -1,0 +1,139 @@
+========================================
+REBUILD + TESTS E2E — TMC-16
+Date : Sun Aug 16 08:52:56 UTC 2026
+Commit : c96f263
+========================================
+
+=== 1. NETTOYAGE DU CACHE ===
+✅ Cache nettoyé
+
+=== 2. REBUILD ===
+
+> ministere-pastoral@0.1.0 build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+   ▲ Next.js 15.1.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (107kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (258kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/25) ...
+   Generating static pages (6/25) 
+   Generating static pages (12/25) 
+listContenus: Unexpected error Error: Dynamic server usage: Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at m (.next/server/app/admin/contenus/page.js:78:35053)
+    at a (.next/server/app/admin/contenus/page.js:78:33429)
+    at stringify (<anonymous>) {
+  description: "Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+listRubriques: Unexpected error Error: Dynamic server usage: Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at h (.next/server/chunks/620.js:1:8713)
+    at a (.next/server/app/admin/contenus/page.js:78:33440)
+    at stringify (<anonymous>) {
+  description: "Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+listRubriques: Unexpected error Error: Dynamic server usage: Route /admin/rubriques couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at h (.next/server/chunks/620.js:1:8713)
+    at n (.next/server/app/admin/rubriques/page.js:1:13246)
+    at stringify (<anonymous>) {
+  description: "Route /admin/rubriques couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (18/25) 
+ ✓ Generating static pages (25/25)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    183 B           114 kB
+├ ○ /_not-found                          979 B           106 kB
+├ ƒ /admin/contacts                      166 B           105 kB
+├ ƒ /admin/contenus                      110 kB          215 kB
+├ ƒ /admin/contenus/[id]/modifier        166 B           105 kB
+├ ƒ /admin/contenus/nouveau              166 B           105 kB
+├ ƒ /admin/evenements                    3.38 kB         109 kB
+├ ƒ /admin/evenements/[id]/modifier      166 B           105 kB
+├ ƒ /admin/evenements/nouveau            166 B           105 kB
+├ ƒ /admin/livres                        3.44 kB         109 kB
+├ ƒ /admin/livres/[id]/modifier          166 B           105 kB
+├ ƒ /admin/livres/nouveau                166 B           105 kB
+├ ƒ /admin/login                         1.09 kB         106 kB
+├ ƒ /admin/mot-de-passe-reinitialiser    166 B           105 kB
+├ ƒ /admin/parametres                    2.9 kB          108 kB
+├ ƒ /admin/partenaires                   166 B           105 kB
+├ ƒ /admin/rubriques                     3.17 kB         108 kB
+├ ƒ /admin/tableau-de-bord               15.8 kB         121 kB
+├ ƒ /admin/utilisateurs                  3.24 kB         109 kB
+├ ○ /contact                             1.48 kB         107 kB
+├ ○ /contenus                            172 B           109 kB
+├ ● /contenus/[id]                       1 kB            178 kB
+├ ○ /evenements                          1.8 kB          112 kB
+├ ƒ /evenements/[id]                     166 B           105 kB
+├ ○ /livres                              2.25 kB         176 kB
+├ ○ /mentions-legales                    166 B           105 kB
+├ ○ /partenariat                         1.67 kB         107 kB
+└ ○ /politique-confidentialite           166 B           105 kB
++ First Load JS shared by all            105 kB
+  ├ chunks/4bd1b696-da9b155f349bf05b.js  52.9 kB
+  ├ chunks/517-b3325a43e7c12fcd.js       50.5 kB
+  └ other shared chunks (total)          1.89 kB
+
+
+ƒ Middleware                             89.9 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+=== 3. DÉMARRAGE DU SERVEUR ===
+PID serveur : 23570
+Attente du serveur (max 20s)...
+✅ Serveur prêt !
+
+=== 4. EXÉCUTION DES TESTS E2E ===
+Exécution de tous les tests...
+
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e/visiteur-parcours.spec.ts:5:9 › TMC-16 : Parcours visiteur › Navigation publique › should_load_accueil_without_error
+[2/12] [chromium] › e2e/visiteur-parcours.spec.ts:18:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_contenus
+[3/12] [chromium] › e2e/visiteur-parcours.spec.ts:27:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_livres
+[4/12] [chromium] › e2e/visiteur-parcours.spec.ts:36:9 › TMC-16 : Parcours visiteur › Navigation publique › should_navigate_from_accueil_to_evenements
+[5/12] [chromium] › e2e/visiteur-parcours.spec.ts:45:9 › TMC-16 : Parcours visiteur › Navigation publique › should_have_footer_with_legal_links
+[6/12] [chromium] › e2e/visiteur-parcours.spec.ts:61:9 › TMC-16 : Parcours visiteur › Page contenus › should_load_contenus_without_error
+[7/12] [chromium] › e2e/visiteur-parcours.spec.ts:68:9 › TMC-16 : Parcours visiteur › Page contenus › should_display_contenu_cards_or_empty_state
+[8/12] [chromium] › e2e/visiteur-parcours.spec.ts:85:9 › TMC-16 : Parcours visiteur › Page livres › should_load_livres_without_error
+[9/12] [chromium] › e2e/visiteur-parcours.spec.ts:92:9 › TMC-16 : Parcours visiteur › Page livres › should_display_livre_cards_or_empty_state
+[10/12] [chromium] › e2e/visiteur-parcours.spec.ts:111:9 › TMC-16 : Parcours visiteur › Page événements › should_load_evenements_without_error
+[11/12] [chromium] › e2e/visiteur-parcours.spec.ts:118:9 › TMC-16 : Parcours visiteur › Page événements › should_display_evenement_cards_or_empty_state
+[12/12] [chromium] › e2e/visiteur-parcours.spec.ts:135:9 › TMC-16 : Parcours visiteur › Parcours de bout en bout › should_complete_full_visitor_journey
+  12 passed (27.8s)
+
+✅ Serveur arrêté
+
+========================================
+FIN DES TESTS TMC-16
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC16_FINAL_RUN_20260816_085256.txt
+========================================
