@@ -25,8 +25,17 @@ async function lireSeoPartenariat() {
 }
 
 async function lireNumeroWhatsApp(): Promise<string> {
-  // 🔧 FORCER le numéro pour le test
-  return '2250707070707';
+  const supabase = createAnonClient();
+  try {
+    const { data } = await supabase
+      .from('parametre')
+      .select('valeur')
+      .eq('cle', 'whatsapp_numero')
+      .single();
+    return data?.valeur || '';
+  } catch {
+    return '';
+  }
 }
 
 export async function generateMetadata(): Promise<Metadata> {

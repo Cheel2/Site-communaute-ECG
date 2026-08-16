@@ -1,17 +1,9 @@
-// src/features/partenariat/actions.ts
 'use server';
 
 import { z } from 'zod';
 import { createAnonClient } from '@/lib/supabase/anon';
 import type { ApiResponse, ApiError } from '@/types/api';
-
-export const partenaireSchema = z.object({
-  nom: z.string().min(1, 'Le nom est requis').max(255),
-  email: z.string().email('Email invalide').max(255),
-  pays: z.string().min(1, 'Le pays est requis').max(255),
-});
-
-export type PartenaireFormData = z.infer<typeof partenaireSchema>;
+import { partenaireSchema, type PartenaireFormData } from './schemas';
 
 function erreurValidation(message: string): ApiResponse<null> {
   const error: ApiError = { code: 'VALIDATION_ERROR', message };

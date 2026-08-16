@@ -27,4 +27,4 @@ yarn-error.log*
 .env*.local
 .env
 .env.test
-.env.test.txt
+.env.test.txtreports/
