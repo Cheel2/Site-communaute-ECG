@@ -1,0 +1,72 @@
+========================================
+TMC-18 — DÉPLACEMENT DES PAGES VERS LE BON DOSSIER
+Date : Sun Aug 16 17:40:50 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Créer les bons dossiers
+✅ Dossiers créés
+
+>>> 2. Déplacer la page nouveau
+✅ Page nouveau déplacée
+
+>>> 3. Déplacer la page modifier
+✅ Page modifier déplacée
+
+>>> 4. Supprimer les anciens dossiers avec parenthèses
+✅ Anciens dossiers supprimés
+
+>>> 5. Vérifier la structure finale
+total 48
+drwxrwxrwx+  4 codespace codespace 4096 Aug 16 08:38 .
+drwxrwxrwx+ 13 codespace codespace 4096 Aug 16 08:38 ..
+drwxrwxrwx+  3 codespace codespace 4096 Aug 16 08:38 [id]
+-rw-rw-rw-   1 codespace codespace 8141 Aug 16 08:38 contenus-client.tsx
+-rw-rw-rw-   1 codespace codespace 6738 Aug 16 08:38 contenus-form.tsx
+-rw-rw-rw-   1 codespace codespace 5489 Aug 16 08:38 contenus-list.tsx
+-rw-rw-rw-   1 codespace codespace 2697 Aug 16 08:38 delete-modal.tsx
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 nouveau
+-rw-rw-rw-   1 codespace codespace  515 Aug 16 08:38 page.tsx
+
+total 12
+drwxrwxrwx+ 2 codespace codespace 4096 Aug 16 08:38 .
+drwxrwxrwx+ 4 codespace codespace 4096 Aug 16 08:38 ..
+-rw-rw-rw-  1 codespace codespace 3483 Aug 16 17:40 page.tsx
+
+total 16
+drwxrwxrwx+ 2 codespace codespace 4096 Aug 16 08:38 .
+drwxrwxrwx+ 3 codespace codespace 4096 Aug 16 08:38 ..
+-rw-rw-rw-  1 codespace codespace 4098 Aug 16 17:40 page.tsx
+
+>>> 6. Build de vérification
+
+> ministere-pastoral@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (107kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (258kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+Failed to compile.
+
+./src/app/admin/contenus/[id]/modifier/page.tsx:118:9
+Type error: Type 'Rubrique[]' is not assignable to type 'import("/workspaces/Site-communaute-ECG/src/types/database").Rubrique[]'.
+  Type 'Rubrique' is missing the following properties from type 'Rubrique': ordre_affichage, date_creation, date_modification
+
+[0m [90m 116 |[39m[0m
+[0m [90m 117 |[39m       [33m<[39m[33mContenusForm[39m[0m
+[0m[31m[1m>[22m[39m[90m 118 |[39m         rubriques[33m=[39m{rubriques}[0m
+[0m [90m     |[39m         [31m[1m^[22m[39m[0m
+[0m [90m 119 |[39m         titre[33m=[39m{titre}[0m
+[0m [90m 120 |[39m         texte[33m=[39m{texte}[0m
+[0m [90m 121 |[39m         rubriqueId[33m=[39m{rubriqueId}[0m
+Static worker exited with code: 1 and signal: null
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_move-pages_20260816_174050.txt
+========================================

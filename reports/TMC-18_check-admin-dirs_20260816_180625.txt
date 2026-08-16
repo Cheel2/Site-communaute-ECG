@@ -1,0 +1,46 @@
+========================================
+TMC-18 — VÉRIFICATION STRUCTURE ADMIN
+Date : Sun Aug 16 18:06:25 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Lister les dossiers dans src/app
+total 24
+drwxrwxrwx+  3 codespace codespace 4096 Aug 16 17:37 (admin)
+drwxrwxrwx+  9 codespace codespace 4096 Aug 16 08:38 (public)
+drwxrwxrwx+  5 codespace codespace 4096 Aug 16 17:37 .
+drwxrwxrwx+ 10 codespace codespace 4096 Aug 16 08:38 ..
+drwxrwxrwx+ 13 codespace codespace 4096 Aug 16 08:38 admin
+-rw-rw-rw-   1 codespace codespace    0 Aug 16 08:38 globals.css
+-rw-rw-rw-   1 codespace codespace  198 Aug 16 08:38 layout.tsx
+
+>>> 2. Lister le contenu de src/app/admin (sans parenthèses)
+total 56
+drwxrwxrwx+ 13 codespace codespace 4096 Aug 16 08:38 .
+drwxrwxrwx+  5 codespace codespace 4096 Aug 16 17:37 ..
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 contacts
+drwxrwxrwx+  4 codespace codespace 4096 Aug 16 08:38 contenus
+drwxrwxrwx+  4 codespace codespace 4096 Aug 16 08:38 evenements
+-rw-rw-rw-   1 codespace codespace  804 Aug 16 08:38 layout.tsx
+drwxrwxrwx+  4 codespace codespace 4096 Aug 16 08:38 livres
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 login
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 mot-de-passe-reinitialiser
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 parametres
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 partenaires
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 rubriques
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 tableau-de-bord
+drwxrwxrwx+  2 codespace codespace 4096 Aug 16 08:38 utilisateurs
+
+>>> 3. Lister le contenu de src/app/(admin) (avec parenthèses)
+total 12
+drwxrwxrwx+ 3 codespace codespace 4096 Aug 16 17:37 .
+drwxrwxrwx+ 5 codespace codespace 4096 Aug 16 17:37 ..
+drwxrwxrwx+ 2 codespace codespace 4096 Aug 16 17:40 contenus
+
+>>> 4. Vérifier où se trouve login/page.tsx
+src/app/admin/login/page.tsx
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_check-admin-dirs_20260816_180625.txt
+========================================

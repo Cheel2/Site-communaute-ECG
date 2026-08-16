@@ -1,0 +1,110 @@
+========================================
+TMC-18 — CORRECTION TYPE Rubrique
+Date : Sun Aug 16 17:42:19 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Corriger la page nouveau
+✅ Page nouveau corrigée
+
+>>> 2. Corriger la page modifier
+✅ Page modifier corrigée
+
+>>> 3. Build de vérification
+
+> ministere-pastoral@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (107kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (258kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/25) ...
+   Generating static pages (6/25) 
+   Generating static pages (12/25) 
+listContenus: Unexpected error Error: Dynamic server usage: Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at p (.next/server/app/admin/contenus/page.js:1:14238)
+    at d (.next/server/app/admin/contenus/page.js:1:12605)
+    at stringify (<anonymous>) {
+  description: "Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+listRubriques: Unexpected error Error: Dynamic server usage: Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at b (.next/server/app/admin/contenus/page.js:1:19031)
+    at d (.next/server/app/admin/contenus/page.js:1:12616)
+    at stringify (<anonymous>) {
+  description: "Route /admin/contenus couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+listRubriques: Unexpected error Error: Dynamic server usage: Route /admin/rubriques couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at m (.next/server/chunks/403.js:3:18947)
+    at f (.next/server/chunks/455.js:14:14184)
+    at i (.next/server/app/admin/contacts/page.js:1:10152)
+    at b (.next/server/app/admin/contenus/page.js:1:19031)
+    at o (.next/server/app/admin/rubriques/page.js:1:18399)
+    at stringify (<anonymous>) {
+  description: "Route /admin/rubriques couldn't be rendered statically because it used `cookies`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (18/25) 
+ ✓ Generating static pages (25/25)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    183 B           114 kB
+├ ○ /_not-found                          979 B           106 kB
+├ ƒ /admin/contacts                      162 B           105 kB
+├ ƒ /admin/contenus                      4.94 kB         215 kB
+├ ƒ /admin/contenus/[id]/modifier        3.58 kB         214 kB
+├ ƒ /admin/contenus/nouveau              3.39 kB         214 kB
+├ ƒ /admin/evenements                    3.38 kB         109 kB
+├ ƒ /admin/evenements/[id]/modifier      162 B           105 kB
+├ ƒ /admin/evenements/nouveau            162 B           105 kB
+├ ƒ /admin/livres                        3.44 kB         109 kB
+├ ƒ /admin/livres/[id]/modifier          162 B           105 kB
+├ ƒ /admin/livres/nouveau                162 B           105 kB
+├ ƒ /admin/login                         1.09 kB         106 kB
+├ ƒ /admin/mot-de-passe-reinitialiser    162 B           105 kB
+├ ƒ /admin/parametres                    2.9 kB          108 kB
+├ ƒ /admin/partenaires                   162 B           105 kB
+├ ƒ /admin/rubriques                     3.17 kB         108 kB
+├ ƒ /admin/tableau-de-bord               15.8 kB         121 kB
+├ ƒ /admin/utilisateurs                  3.24 kB         109 kB
+├ ○ /contact                             1.49 kB         107 kB
+├ ○ /contenus                            172 B           109 kB
+├ ● /contenus/[id]                       1 kB            178 kB
+├ ○ /evenements                          1.8 kB          112 kB
+├ ƒ /evenements/[id]                     162 B           105 kB
+├ ○ /livres                              2.25 kB         176 kB
+├ ○ /mentions-legales                    162 B           105 kB
+├ ○ /partenariat                         1.67 kB         107 kB
+└ ○ /politique-confidentialite           162 B           105 kB
++ First Load JS shared by all            105 kB
+  ├ chunks/4bd1b696-da9b155f349bf05b.js  52.9 kB
+  ├ chunks/517-b3325a43e7c12fcd.js       50.5 kB
+  └ other shared chunks (total)          1.89 kB
+
+
+ƒ Middleware                             89.9 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_fix-rubrique-type_20260816_174219.txt
+========================================

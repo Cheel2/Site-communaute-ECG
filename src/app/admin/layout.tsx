@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RoleProvider } from "@/components/RoleContext";
 import { AdminShell } from "@/components/AdminShell";
@@ -15,19 +14,25 @@ export default async function AdminLayout({ children }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/admin/login");
+  // ⚠️ La redirection est gérée par le middleware.
+  // On laisse passer toutes les requêtes, y compris /admin/login.
+  // Si l'utilisateur n'est pas authentifié sur une route protégée,
+  // le middleware le redirigera vers /admin/login.
+
+  // Récupérer le rôle de l'utilisateur (si authentifié)
+  let role = null;
+  if (user) {
+    const { data: userData } = await supabase
+      .from("utilisateur")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    role = userData?.role ?? null;
   }
 
-  const { data: userData } = await supabase
-    .from("utilisateur")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
   return (
-    <RoleProvider initialRole={userData?.role ?? null}>
-      <AdminShell userEmail={user.email ?? ""}>{children}</AdminShell>
+    <RoleProvider initialRole={role}>
+      <AdminShell userEmail={user?.email ?? ""}>{children}</AdminShell>
     </RoleProvider>
   );
 }

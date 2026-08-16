@@ -1,0 +1,168 @@
+========================================
+TMC-18 — EXÉCUTION E2E (après middleware v2)
+Date : Sun Aug 16 18:20:20 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> Attente que le serveur soit prêt (10s)
+
+>>> Exécution du test E2E
+◇ injected env (3) from .env.local // tip: ◈ secrets for agents [www.dotenvx.com]
+
+Running 7 tests using 1 worker
+
+◇ injected env (0) from .env.local // tip: ⌘ enable debugging { debug: true }
+  ✘  1 [chromium] › e2e/admin-crud-contenu.spec.ts:8:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_se_connecter_avec_identifiants_valides (1.8s)
+◇ injected env (0) from .env.local // tip: ◈ secrets for agents [www.dotenvx.com]
+  ✘  2 [chromium] › e2e/admin-crud-contenu.spec.ts:34:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_refuser_login_avec_mot_de_passe_invalide (1.6s)
+◇ injected env (0) from .env.local // tip: ⌘ override existing { override: true }
+  ✘  3 [chromium] › e2e/admin-crud-contenu.spec.ts:53:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_creer_un_contenu_et_le_publier (1.8s)
+◇ injected env (0) from .env.local // tip: ◈ secrets for agents [www.dotenvx.com]
+  ✘  4 [chromium] › e2e/admin-crud-contenu.spec.ts:89:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_afficher_erreur_si_titre_vide (1.8s)
+◇ injected env (0) from .env.local // tip: ⌘ suppress logs { quiet: true }
+  ✘  5 [chromium] › e2e/admin-crud-contenu.spec.ts:124:9 › TMC-18 : Scénario Admin CRUD contenu complet › Modification d'un contenu › should_modifier_un_contenu_existant (1.7s)
+◇ injected env (0) from .env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+  ✘  6 [chromium] › e2e/admin-crud-contenu.spec.ts:165:9 › TMC-18 : Scénario Admin CRUD contenu complet › Suppression d'un contenu › should_supprimer_un_contenu_via_la_liste (1.7s)
+◇ injected env (0) from .env.local // tip: ◈ secrets for agents [www.dotenvx.com]
+  ✘  7 [chromium] › e2e/admin-crud-contenu.spec.ts:212:9 › TMC-18 : Scénario Admin CRUD contenu complet › Parcours complet › should_complete_full_admin_contenu_journey (1.8s)
+
+
+  1) [chromium] › e2e/admin-crud-contenu.spec.ts:8:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_se_connecter_avec_identifiants_valides 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+       7 |   test.describe('Authentification admin', () => {
+       8 |     test('should_se_connecter_avec_identifiants_valides', async ({ page }) => {
+    >  9 |       await page.goto('/admin/login');
+         |                  ^
+      10 |       await page.waitForLoadState('domcontentloaded');
+      11 |
+      12 |       await expect(page).toHaveURL('/admin/login');
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:9:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--10877-r-avec-identifiants-valides-chromium/error-context.md
+
+  2) [chromium] › e2e/admin-crud-contenu.spec.ts:34:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_refuser_login_avec_mot_de_passe_invalide 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      33 |
+      34 |     test('should_refuser_login_avec_mot_de_passe_invalide', async ({ page }) => {
+    > 35 |       await page.goto('/admin/login');
+         |                  ^
+      36 |       await page.waitForLoadState('domcontentloaded');
+      37 |
+      38 |       await page.getByLabel('Email').fill('admin@test.com');
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:35:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--c67e2--avec-mot-de-passe-invalide-chromium/error-context.md
+
+  3) [chromium] › e2e/admin-crud-contenu.spec.ts:53:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_creer_un_contenu_et_le_publier 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      55 |       const testPassword = process.env.ADMIN_TEST_PASSWORD || 'Admin123!';
+      56 |
+    > 57 |       await page.goto('/admin/login');
+         |                  ^
+      58 |       await page.waitForLoadState('domcontentloaded');
+      59 |
+      60 |       await page.getByLabel('Email').fill(testEmail);
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:57:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--21068-er-un-contenu-et-le-publier-chromium/error-context.md
+
+  4) [chromium] › e2e/admin-crud-contenu.spec.ts:89:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_afficher_erreur_si_titre_vide 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      91 |       const testPassword = process.env.ADMIN_TEST_PASSWORD || 'Admin123!';
+      92 |
+    > 93 |       await page.goto('/admin/login');
+         |                  ^
+      94 |       await page.waitForLoadState('domcontentloaded');
+      95 |
+      96 |       await page.getByLabel('Email').fill(testEmail);
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:93:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--6e8fa-ficher-erreur-si-titre-vide-chromium/error-context.md
+
+  5) [chromium] › e2e/admin-crud-contenu.spec.ts:124:9 › TMC-18 : Scénario Admin CRUD contenu complet › Modification d'un contenu › should_modifier_un_contenu_existant 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      126 |       const testPassword = process.env.ADMIN_TEST_PASSWORD || 'Admin123!';
+      127 |
+    > 128 |       await page.goto('/admin/login');
+          |                  ^
+      129 |       await page.waitForLoadState('domcontentloaded');
+      130 |
+      131 |       await page.getByLabel('Email').fill(testEmail);
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:128:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--608b5-odifier-un-contenu-existant-chromium/error-context.md
+
+  6) [chromium] › e2e/admin-crud-contenu.spec.ts:165:9 › TMC-18 : Scénario Admin CRUD contenu complet › Suppression d'un contenu › should_supprimer_un_contenu_via_la_liste 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      167 |       const testPassword = process.env.ADMIN_TEST_PASSWORD || 'Admin123!';
+      168 |
+    > 169 |       await page.goto('/admin/login');
+          |                  ^
+      170 |       await page.waitForLoadState('domcontentloaded');
+      171 |
+      172 |       await page.getByLabel('Email').fill(testEmail);
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:169:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--83d83-mer-un-contenu-via-la-liste-chromium/error-context.md
+
+  7) [chromium] › e2e/admin-crud-contenu.spec.ts:212:9 › TMC-18 : Scénario Admin CRUD contenu complet › Parcours complet › should_complete_full_admin_contenu_journey 
+
+    Error: page.goto: net::ERR_TOO_MANY_REDIRECTS at http://localhost:3000/admin/login
+    Call log:
+      - navigating to "http://localhost:3000/admin/login", waiting until "load"
+
+
+      214 |       const testPassword = process.env.ADMIN_TEST_PASSWORD || 'Admin123!';
+      215 |
+    > 216 |       await page.goto('/admin/login');
+          |                  ^
+      217 |       await page.waitForLoadState('domcontentloaded');
+      218 |
+      219 |       await page.getByLabel('Email').fill(testEmail);
+        at /workspaces/Site-communaute-ECG/e2e/admin-crud-contenu.spec.ts:216:18
+
+    Error Context: playwright-report/admin-crud-contenu-TMC-18--b7f1b--full-admin-contenu-journey-chromium/error-context.md
+
+  7 failed
+    [chromium] › e2e/admin-crud-contenu.spec.ts:8:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_se_connecter_avec_identifiants_valides 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:34:9 › TMC-18 : Scénario Admin CRUD contenu complet › Authentification admin › should_refuser_login_avec_mot_de_passe_invalide 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:53:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_creer_un_contenu_et_le_publier 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:89:9 › TMC-18 : Scénario Admin CRUD contenu complet › Création d'un contenu › should_afficher_erreur_si_titre_vide 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:124:9 › TMC-18 : Scénario Admin CRUD contenu complet › Modification d'un contenu › should_modifier_un_contenu_existant 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:165:9 › TMC-18 : Scénario Admin CRUD contenu complet › Suppression d'un contenu › should_supprimer_un_contenu_via_la_liste 
+    [chromium] › e2e/admin-crud-contenu.spec.ts:212:9 › TMC-18 : Scénario Admin CRUD contenu complet › Parcours complet › should_complete_full_admin_contenu_journey 
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_e2e-after-middleware-v2_20260816_182020.txt
+========================================

@@ -1,0 +1,53 @@
+========================================
+TMC-18 — AJOUT getContenu DANS actions.ts
+Date : Sun Aug 16 17:25:27 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Ajout de getContenu à src/features/contenus/actions.ts
+
+>>> 2. Vérification : affichage des fonctions exportées dans actions.ts
+export async function listContenus(): Promise<ContenuAvecRubrique[]> {
+export async function createContenu(
+export async function updateContenu(
+export async function deleteContenu(
+export async function getContenu(
+export async function getContenu(
+
+>>> 3. Vérification de la présence de getContenu
+✅ getContenu a bien été ajouté
+
+>>> 4. Build de vérification
+
+> ministere-pastoral@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/features/contenus/actions.ts
+Module parse failed: Identifier 'getContenu' has already been declared (293:64)
+File was processed with these loaders:
+ * ./node_modules/next/dist/build/webpack/loaders/next-flight-loader/index.js
+ * ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js
+You may need an additional loader to handle the result of these loaders.
+|     }
+| }
+> export async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getContenu(id) {
+|     if (!id || !UUID_PATTERN.test(id)) {
+|         return {
+
+Import trace for requested module:
+./src/features/contenus/actions.ts
+./src/app/admin/contenus/page.tsx
+
+
+> Build failed because of webpack errors
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_add-getContenu_20260816_172527.txt
+========================================

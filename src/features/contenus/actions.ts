@@ -327,3 +327,52 @@ export async function deleteContenu(
     };
   }
 }
+export async function getContenu(
+  id: string
+): Promise<ApiResponse<ContenuAvecRubrique>> {
+  if (!id || !UUID_PATTERN.test(id)) {
+    return {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Identifiant de contenu invalide.',
+      },
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const authError = await requireAuthenticatedUser(supabase);
+    if (authError) {
+      return { error: authError };
+    }
+
+    const { data, error } = await supabase
+      .from('contenu')
+      .select('*, rubrique(nom)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      return { error: mapSupabaseError(error) };
+    }
+
+    if (!data) {
+      return {
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Le contenu demandé est introuvable.',
+        },
+      };
+    }
+
+    return { data: data as ContenuAvecRubrique };
+  } catch {
+    return {
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Une erreur technique est survenue.',
+      },
+    };
+  }
+}

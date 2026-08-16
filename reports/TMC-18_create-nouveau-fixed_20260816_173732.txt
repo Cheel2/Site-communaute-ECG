@@ -1,0 +1,26 @@
+========================================
+TMC-18 — CRÉATION page nouveau (fixée)
+Date : Sun Aug 16 17:37:32 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> Vérification du fichier créé
+✅ Fichier existe
+120 src/app/(admin)/contenus/nouveau/page.tsx
+
+>>> 10 premières lignes :
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createContenu } from "@/features/contenus/actions";
+import { listRubriques } from "@/features/rubriques/actions";
+import { ContenusForm } from "../contenus-form";
+
+type Rubrique = { id: string; nom: string };
+
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_create-nouveau-fixed_20260816_173732.txt
+========================================

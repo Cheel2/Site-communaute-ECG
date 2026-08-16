@@ -1,20 +1,26 @@
+========================================
+TMC-18 — CORRECTION MIDDLEWARE
+Date : Sun Aug 16 18:13:24 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Modifier middleware.ts pour exclure /admin/login proprement
+✅ Middleware corrigé
+
+>>> 2. Vérifier le nouveau middleware
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
+  // 1. Vérifier si la route est publique (admin/login)
   const pathname = request.nextUrl.pathname;
 
-  // 1. Exclure les routes publiques admin
-  if (pathname === "/admin/login") {
+  // Exclure /admin/login et /admin/mot-de-passe-reinitialiser de la protection
+  if (pathname === "/admin/login" || pathname === "/admin/mot-de-passe-reinitialiser") {
     return NextResponse.next();
   }
 
-  // 2. Ne protéger que les routes admin (sauf login)
-  if (!pathname.startsWith("/admin")) {
-    return NextResponse.next();
-  }
-
-  // 3. Vérifier les variables d'environnement
+  // 2. Vérifier les variables d'environnement
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -22,7 +28,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Créer le client Supabase
+  // 3. Créer le client Supabase
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -44,16 +50,20 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // 5. Vérifier l'authentification
+  // 4. Vérifier l'authentification
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 6. Si non authentifié → rediriger vers login
+  // 5. Si non authentifié ET route admin (sauf login déjà exclu) → rediriger
   if (!user) {
     const redirectUrl = request.nextUrl.clone();
+    const redirectedFrom = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+
     redirectUrl.pathname = "/admin/login";
     redirectUrl.search = "";
+    redirectUrl.searchParams.set("redirectedFrom", redirectedFrom);
+
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -63,3 +73,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*"],
 };
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_fix-middleware_20260816_181324.txt
+========================================

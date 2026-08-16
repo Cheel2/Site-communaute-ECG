@@ -1,0 +1,53 @@
+========================================
+TMC-18 — CORRECTION EXPORT PartenaireFormData
+Date : Sun Aug 16 17:32:48 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Vérifier si PartenaireFormData est défini dans actions.ts
+✅ PartenaireFormData est défini
+
+>>> 2. Ajouter l'export de PartenaireFormData
+✅ 'export' ajouté à la définition existante
+
+>>> 3. Vérification de l'export
+✅ PartenaireFormData est maintenant exporté
+
+>>> 4. Build de vérification
+
+> ministere-pastoral@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/features/partenariat/actions.ts
+Error:   [31mx[0m Expected ',', got 'type'
+   ,-[[36;1;4m/workspaces/Site-communaute-ECG/src/features/partenariat/actions.ts[0m:6:1]
+ [2m3[0m | import { z } from 'zod';
+ [2m4[0m | import { createAnonClient } from '@/lib/supabase/anon';
+ [2m5[0m | import type { ApiResponse, ApiError } from '@/types/api';
+ [2m6[0m | import { partenaireSchema, export type PartenaireFormData } from './schemas';
+   : [35;1m                                  ^^^^[0m
+ [2m7[0m | 
+ [2m8[0m | function erreurValidation(message: string): ApiResponse<null> {
+ [2m9[0m |   const error: ApiError = { code: 'VALIDATION_ERROR', message };
+   `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/features/partenariat/actions.ts
+./src/app/(public)/partenariat/partenariat-form.tsx
+
+
+> Build failed because of webpack errors
+
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_fix-partenariat-export_20260816_173248.txt
+========================================

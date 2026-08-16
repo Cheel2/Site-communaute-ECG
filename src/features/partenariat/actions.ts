@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createAnonClient } from '@/lib/supabase/anon';
 import type { ApiResponse, ApiError } from '@/types/api';
 import { partenaireSchema, type PartenaireFormData } from './schemas';
+export type { PartenaireFormData };
 
 function erreurValidation(message: string): ApiResponse<null> {
   const error: ApiError = { code: 'VALIDATION_ERROR', message };

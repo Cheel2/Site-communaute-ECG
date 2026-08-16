@@ -1,0 +1,32 @@
+========================================
+TMC-18 — VÉRIFICATION CONFIG PLAYWRIGHT
+Date : Sun Aug 16 17:50:29 UTC 2026
+Commit : 1d101ca
+========================================
+
+>>> 1. Afficher playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  outputDir: 'playwright-report',
+  use: {
+    baseURL: 'http://localhost:3000',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    port: 3000,
+    reuseExistingServer: true,
+    timeout: 30000,
+  },
+});
+========================================
+FIN DU RAPPORT
+Fichier : /workspaces/Site-communaute-ECG/reports/TMC-18_check-playwright-config_20260816_175029.txt
+========================================
