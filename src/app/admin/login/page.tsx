@@ -1,15 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { login } from "@/features/auth/actions";
 import type { ApiResponse } from "@/types/api";
 
-const initialState: ApiResponse<{ success: boolean }> = {
+const initialState: ApiResponse<{ success: boolean; redirectTo?: string }> = {
   data: { success: false },
 };
 
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(login, initialState);
+
+  // ✅ Redirection côté client après connexion réussie
+  useEffect(() => {
+    if (state.data?.success && state.data?.redirectTo) {
+      router.push(state.data.redirectTo);
+    }
+  }, [state, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">

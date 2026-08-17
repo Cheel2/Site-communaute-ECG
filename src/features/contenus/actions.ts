@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidateTag } from 'next/cache';
-import type { ZodError } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import type { Contenu, Rubrique } from '@/types/database';
 import type { ApiError, ApiResponse } from '@/types/api';
@@ -262,6 +261,7 @@ export async function updateContenu(
       };
     }
 
+    // ✅ Forcer la revalidation après modification
     revalidateTag('contenus');
 
     return { data: data as ContenuAvecRubrique };
@@ -327,6 +327,7 @@ export async function deleteContenu(
     };
   }
 }
+
 export async function getContenu(
   id: string
 ): Promise<ApiResponse<ContenuAvecRubrique>> {

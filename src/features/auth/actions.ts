@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 import { loginSchema } from "./schemas";
 
-type AuthActionResult = ApiResponse<{ success: boolean }>;
+type AuthActionResult = ApiResponse<{ success: boolean; redirectTo?: string }>;
 
 export async function login(
   _prevState: AuthActionResult,
@@ -37,14 +37,16 @@ export async function login(
     };
   }
 
+  // ✅ Retourner un indicateur de succès + URL de redirection
   return {
     data: {
       success: true,
+      redirectTo: "/admin/tableau-de-bord",
     },
   };
 }
 
-export async function logout(): Promise<AuthActionResult> {
+export async function logout(): Promise<ApiResponse<{ success: boolean }>> {
   const supabase = await createClient();
 
   await supabase.auth.signOut();
