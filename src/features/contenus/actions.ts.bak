@@ -1,7 +1,5 @@
 'use server';
 
-import type { ZodError } from 'zod';
-
 import { revalidateTag } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import type { Contenu, Rubrique } from '@/types/database';
