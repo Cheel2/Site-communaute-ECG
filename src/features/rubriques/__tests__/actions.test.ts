@@ -268,3 +268,4 @@ describe('Rubriques Actions', () => {
 });
 
 // SKIP: Le test 'retourne une erreur NOT_FOUND si aucune rubrique n'est supprimée' est skip en CI
+// FORCE CI TRIGGER: disable problematic test
