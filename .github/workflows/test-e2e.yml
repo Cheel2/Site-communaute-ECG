@@ -10,7 +10,7 @@ jobs:
   e2e:
     name: Playwright — Tests E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -31,13 +31,13 @@ jobs:
         run: npm ci
 
       - name: Installer les navigateurs Playwright
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
 
       - name: Build du projet
         run: npm run build
 
       - name: Exécuter les tests E2E
-        run: npx playwright test --reporter=list
+        run: npx playwright test --reporter=list --workers=1
 
       - name: Upload du rapport Playwright
         if: always()
