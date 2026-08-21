@@ -37,11 +37,13 @@ export async function login(
     };
   }
 
-  // ✅ Retourner un indicateur de succès + URL de redirection
+  // ✅ Récupérer redirectedFrom du formData s'il est présent
+  const redirectedFrom = formData.get("redirectedFrom")?.toString() || null;
+
   return {
     data: {
       success: true,
-      redirectTo: "/admin/tableau-de-bord",
+      redirectTo: redirectedFrom || "/admin/tableau-de-bord",
     },
   };
 }

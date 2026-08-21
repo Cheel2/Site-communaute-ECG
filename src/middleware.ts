@@ -49,11 +49,19 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 6. Si non authentifié → rediriger vers login
+  // 6. Si non authentifié → rediriger vers login avec redirectedFrom
   if (!user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
-    redirectUrl.search = "";
+    // ✅ Conserver le paramètre redirectedFrom s'il existe
+    const originalRedirect = request.nextUrl.searchParams.get("redirectedFrom");
+    if (originalRedirect) {
+      redirectUrl.search = `?redirectedFrom=${encodeURIComponent(originalRedirect)}`;
+    } else {
+      // Si on est sur une page admin et qu'il n'y a pas de redirectedFrom,
+      // on sauvegarde la page actuelle comme redirectedFrom
+      redirectUrl.search = `?redirectedFrom=${encodeURIComponent(pathname + request.nextUrl.search)}`;
+    }
     return NextResponse.redirect(redirectUrl);
   }
 
